@@ -131,6 +131,19 @@
 
   .empty-state { text-align:center; padding:60px 20px; color:var(--text-muted); }
   @media(max-width:500px) { .projects-grid{grid-template-columns:1fr;} .form-row{grid-template-columns:1fr;} }
+
+  /* Auto-health signals */
+  .btn-refresh { min-width:126px; transition:all 0.2s; }
+  .btn-refresh.checking { opacity:0.6; cursor:not-allowed; }
+  .health-signals { display:flex; flex-wrap:wrap; gap:4px; margin-top:7px; }
+  .sig { font-size:10px; padding:2px 7px; border-radius:4px; display:inline-flex; align-items:center; gap:3px; font-family:'JetBrains Mono',monospace; font-weight:500; }
+  .sig-up   { background:var(--green-bg);  color:var(--green); }
+  .sig-down { background:var(--red-bg);    color:var(--red); }
+  .sig-fresh{ background:var(--cyan-bg);   color:var(--cyan); }
+  .sig-stale{ background:var(--yellow-bg); color:var(--yellow); }
+  .sig-old  { background:rgba(255,255,255,0.04); color:var(--text-muted); }
+  .sig-bot  { background:var(--purple-bg); color:var(--purple); }
+  .sig-time { background:rgba(255,255,255,0.03); color:var(--text-muted); font-weight:400; }
 </style>
 </head>
 <body>
@@ -142,6 +155,7 @@
       <p id="lastUpdated"></p>
     </div>
     <div class="header-right">
+      <button class="btn btn-refresh" id="refreshBtn" onclick="refreshHealth()">↻ Refresh Health</button>
       <button class="btn" onclick="exportData()">Export JSON</button>
       <button class="btn" onclick="importData()">Import</button>
       <button class="btn btn-primary" onclick="openModal()">+ New Project</button>
@@ -195,6 +209,102 @@
 
 <script>
 const STORAGE_KEY = 'mike_cmd_center_v3';
+const LIVE_KEY = 'mike_cmd_center_live_v1';
+
+function loadLiveData(){try{const r=localStorage.getItem(LIVE_KEY);if(r)return JSON.parse(r);}catch(e){}return{};}
+function saveLiveData(d){localStorage.setItem(LIVE_KEY,JSON.stringify(d));}
+
+async function pingUrl(url){
+  try{
+    const ctrl=new AbortController();
+    const t=setTimeout(()=>ctrl.abort(),6000);
+    await fetch(url,{method:'HEAD',mode:'no-cors',signal:ctrl.signal});
+    clearTimeout(t); return true;
+  }catch(e){return false;}
+}
+
+async function checkRepoRecency(repoUrl){
+  try{
+    const m=repoUrl.match(/github\.com\/([^/]+)\/([^/?#\s]+)/);
+    if(!m)return null;
+    const repo=m[2].replace(/\.git$/,'');
+    const r=await fetch(`https://api.github.com/repos/${m[1]}/${repo}`,{headers:{'Accept':'application/vnd.github.v3+json'}});
+    if(!r.ok)return null;
+    const data=await r.json();
+    return Math.floor((Date.now()-new Date(data.pushed_at))/86400000);
+  }catch(e){return null;}
+}
+
+async function fetchBotHealth(){
+  try{
+    const r=await fetch('https://mikedmote52.github.io/mikes-trading-bot-dashboard/health.json',{cache:'no-store'});
+    if(!r.ok)return null;
+    return await r.json();
+  }catch(e){return null;}
+}
+
+function buildSignalsHtml(live){
+  if(!live||!live.checkedAt)return '';
+  const parts=[];
+  if(live.siteUp===true) parts.push('<span class="sig sig-up">⬤ Live</span>');
+  else if(live.siteUp===false) parts.push('<span class="sig sig-down">⬤ Unreachable</span>');
+  if(live.repoAgeDays!=null){
+    const d=live.repoAgeDays;
+    const cls=d<7?'sig-fresh':d<30?'sig-stale':'sig-old';
+    const label=d===0?'today':d+'d ago';
+    parts.push(`<span class="sig ${cls}">↑ ${label}</span>`);
+  }
+  if(live.botHealth){
+    const bh=live.botHealth;
+    if(bh.health!=null) parts.push(`<span class="sig sig-bot">🤖 ${bh.health}%</span>`);
+    if(bh.winRate!=null) parts.push(`<span class="sig sig-bot">W:${bh.winRate}%</span>`);
+    if(bh.summary) parts.push(`<span class="sig sig-bot" title="${bh.summary}">📡 ${bh.summary.slice(0,24)}${bh.summary.length>24?'…':''}</span>`);
+  }
+  const mins=Math.round((Date.now()-new Date(live.checkedAt))/60000);
+  const tStr=mins<1?'just now':mins<60?mins+'m ago':Math.round(mins/60)+'h ago';
+  parts.push(`<span class="sig sig-time">checked ${tStr}</span>`);
+  return`<div class="health-signals">${parts.join('')}</div>`;
+}
+
+let _refreshing=false;
+async function refreshHealth(){
+  if(_refreshing)return;
+  _refreshing=true;
+  const btn=document.getElementById('refreshBtn');
+  if(btn){btn.disabled=true;btn.classList.add('checking');btn.textContent='↻ Checking...';}
+
+  const projects=getProjects();
+  const liveData=loadLiveData();
+
+  // Fetch trading bot health.json once up front (CORS-friendly from GitHub Pages)
+  const botHealth=await fetchBotHealth();
+
+  await Promise.all(projects.map(async(p,idx)=>{
+    const result={checkedAt:new Date().toISOString()};
+    const liveLinks=(p.links||[]).filter(l=>l.url&&l.type==='live');
+    // Skip repo links that are marked private (label contains "private")
+    const repoLinks=(p.links||[]).filter(l=>l.url&&l.type==='repo'&&l.url.includes('github.com')&&!(l.label||'').toLowerCase().includes('private'));
+
+    if(liveLinks.length){
+      result.siteUp=await pingUrl(liveLinks[0].url);
+    }
+    if(repoLinks.length){
+      const ages=await Promise.all(repoLinks.map(l=>checkRepoRecency(l.url)));
+      const valid=ages.filter(a=>a!=null);
+      if(valid.length) result.repoAgeDays=Math.min(...valid);
+    }
+    if(p.subtitle==='mikes-trading-bot'&&botHealth){
+      result.botHealth=botHealth;
+    }
+    liveData[idx]=result;
+  }));
+
+  saveLiveData(liveData);
+  renderAll();
+  if(btn){btn.disabled=false;btn.classList.remove('checking');btn.textContent='↻ Refresh Health';}
+  showToast('Health signals updated');
+  _refreshing=false;
+}
 
 const DEFAULT_PROJECTS = [
   {
@@ -494,6 +604,8 @@ function renderProjects() {
 
   if(!filtered.length) { grid.innerHTML='<div class="empty-state"><p>No projects match.</p></div>'; return; }
 
+  const liveData = loadLiveData();
+
   grid.innerHTML = filtered.map(p => {
     const idx = projects.indexOf(p);
     const h = p.health||0;
@@ -535,6 +647,7 @@ function renderProjects() {
               <div class="health-pct" style="color:${hc}">${h}%</div>
             </div>
             ${p.nextSteps ? `<div class="health-next"><strong>Next:</strong> ${p.nextSteps}</div>` : ''}
+            ${buildSignalsHtml(liveData[idx])}
           </div>
           ${(p.tech||[]).length ? `<div class="card-tech">${p.tech.map(t=>`<span class="tech-tag">${t}</span>`).join('')}</div>` : ''}
           <div class="card-links">${linksHtml}</div>
@@ -633,6 +746,7 @@ function renderAll(){renderStats();renderProjects();document.getElementById('las
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();if(e.key==='n'&&(e.metaKey||e.ctrlKey)){e.preventDefault();openModal();}});
 
 renderAll();
+setTimeout(refreshHealth, 1200);
 </script>
 </body>
 </html>
