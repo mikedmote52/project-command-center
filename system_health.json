@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-04T08:44:22Z",
+  "generated_at": "2026-04-04T08:59:24Z",
   "projects": {
     "mikes-trading-bot": {
       "health": 55,
@@ -8,11 +8,11 @@
       "last_data": "2026-04-03T23:26:31Z",
       "warnings": [
         "12 errors in log today",
-        "health.json is 557m old"
+        "health.json is 572m old"
       ],
       "subtitle_match": "mikes-trading-bot",
       "project_id": "mikes-trading-bot",
-      "collected_at": "2026-04-04T08:44:21Z"
+      "collected_at": "2026-04-04T08:59:23Z"
     },
     "claude-kalshi": {
       "health": 60,
@@ -20,11 +20,11 @@
       "summary": "5/5 containers up, 1 sector signals, 20 opportunities",
       "last_data": "2026-04-03T22:58:19.907248",
       "warnings": [
-        "Last Kalshi analysis 586m ago"
+        "Last Kalshi analysis 601m ago"
       ],
       "subtitle_match": "claude-kalshi",
       "project_id": "claude-kalshi",
-      "collected_at": "2026-04-04T08:44:22Z"
+      "collected_at": "2026-04-04T08:59:23Z"
     },
     "sentinel-compass": {
       "health": 65,
@@ -36,7 +36,7 @@
       ],
       "subtitle_match": "sentinel-compass",
       "project_id": "sentinel-compass",
-      "collected_at": "2026-04-04T08:44:22Z"
+      "collected_at": "2026-04-04T08:59:23Z"
     },
     "intelligence-bridge": {
       "health": 40,
@@ -44,31 +44,31 @@
       "summary": "3/3 systems live, 63 total signals",
       "last_data": "2026-04-03T22:58:22.323515",
       "warnings": [
-        "Feed last updated 9h ago"
+        "Feed last updated 10h ago"
       ],
       "subtitle_match": "intelligence-bridge",
       "project_id": "intelligence-bridge",
-      "collected_at": "2026-04-04T08:44:22Z"
+      "collected_at": "2026-04-04T08:59:23Z"
     },
     "side-gig-bot": {
       "health": 100,
       "status": "running",
-      "summary": "HTTP 200, 218ms",
-      "last_data": "2026-04-04T08:44:22Z",
+      "summary": "HTTP 200, 307ms",
+      "last_data": "2026-04-04T08:59:24Z",
       "warnings": [],
       "subtitle_match": "side-gig-bot",
       "project_id": "side-gig-bot",
-      "collected_at": "2026-04-04T08:44:22Z"
+      "collected_at": "2026-04-04T08:59:24Z"
     },
     "project-command-center": {
       "health": 100,
       "status": "running",
       "summary": "Health publisher active",
-      "last_data": "2026-04-04T08:44:22Z",
+      "last_data": "2026-04-04T08:59:24Z",
       "warnings": [],
       "subtitle_match": "project-command-center",
       "project_id": "project-command-center",
-      "collected_at": "2026-04-04T08:44:22Z"
+      "collected_at": "2026-04-04T08:59:24Z"
     }
   }
 }
