@@ -153,6 +153,7 @@
     <div class="header-left">
       <h1>Project <span>Command Center</span></h1>
       <p id="lastUpdated"></p>
+      <p id="autoHealthBanner" style="font-size:11px;color:var(--text-muted);margin-top:2px;"></p>
     </div>
     <div class="header-right">
       <button class="btn btn-refresh" id="refreshBtn" onclick="refreshHealth()">↻ Refresh Health</button>
@@ -209,6 +210,40 @@
 
 <script>
 const STORAGE_KEY = 'mike_cmd_center_v3';
+
+// ── Auto-health (system_health.json published by health_publisher.py) ───────
+let autoHealthData = null;
+async function fetchAutoHealth() {
+  try {
+    const res = await fetch('system_health.json?t=' + Date.now());
+    if (!res.ok) return;
+    autoHealthData = await res.json();
+    updateAutoHealthBanner();
+    renderProjects();
+  } catch(e) { /* No system_health.json yet — manual/live mode only */ }
+}
+function updateAutoHealthBanner() {
+  if (!autoHealthData) return;
+  const agoMs = Date.now() - new Date(autoHealthData.generated_at).getTime();
+  const agoMin = Math.round(agoMs / 60000);
+  const agoText = agoMin < 60 ? `${agoMin}m ago` : `${Math.round(agoMin/60)}h ago`;
+  const el = document.getElementById('autoHealthBanner');
+  if (el) el.textContent = `Last auto-update: ${agoText}`;
+}
+function getAutoHealth(project) {
+  if (!autoHealthData?.projects) return null;
+  for (const entry of Object.values(autoHealthData.projects)) {
+    const sub = (entry.subtitle_match || '').toLowerCase();
+    const pid = (entry.project_id || '').toLowerCase();
+    const pSub = (project.subtitle || '').toLowerCase();
+    const pName = (project.name || '').toLowerCase();
+    if (sub && (pSub === sub || pSub.includes(sub) || sub.includes(pSub) || pid === pSub || pName.includes(sub))) {
+      return entry;
+    }
+  }
+  return null;
+}
+// ───────────────────────────────────────────────────────────────────────────
 const LIVE_KEY = 'mike_cmd_center_live_v1';
 
 function loadLiveData(){try{const r=localStorage.getItem(LIVE_KEY);if(r)return JSON.parse(r);}catch(e){}return{};}
@@ -608,8 +643,12 @@ function renderProjects() {
 
   grid.innerHTML = filtered.map(p => {
     const idx = projects.indexOf(p);
-    const h = p.health||0;
+    const autoEntry = getAutoHealth(p);
+    const h = autoEntry ? autoEntry.health : (p.health||0);
     const hc = healthColor(h);
+    const autobadge = autoEntry
+      ? `<span style="font-size:9px;padding:2px 6px;border-radius:4px;background:rgba(16,185,129,0.15);color:var(--green);font-weight:600;margin-left:6px;">Auto ✓</span>`
+      : `<span style="font-size:9px;padding:2px 6px;border-radius:4px;background:rgba(255,255,255,0.05);color:var(--text-muted);margin-left:6px;">Manual</span>`;
 
     const liveLinks = (p.links||[]).filter(l=>l.url&&l.type==='live');
     const repoLinks = (p.links||[]).filter(l=>l.url&&l.type==='repo');
@@ -641,7 +680,7 @@ function renderProjects() {
           </div>
           <div class="card-desc">${p.desc}</div>
           <div class="card-health">
-            <div class="health-label">Project Health</div>
+            <div class="health-label" style="display:flex;align-items:center;">Project Health${autobadge}</div>
             <div class="health-bar-container">
               <div class="health-bar-bg"><div class="health-bar-fill" style="width:${h}%;background:${hc}"></div></div>
               <div class="health-pct" style="color:${hc}">${h}%</div>
@@ -747,6 +786,8 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();if(e.ke
 
 renderAll();
 setTimeout(refreshHealth, 1200);
+fetchAutoHealth();
+setInterval(updateAutoHealthBanner, 60000);
 </script>
 </body>
 </html>

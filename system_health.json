@@ -1,0 +1,59 @@
+{
+  "generated_at": "2026-04-04T00:09:32.021066+00:00",
+  "projects": {
+    "squeeze-prophet": {
+      "health": 75,
+      "status": "WARNING",
+      "details": "File age: 0.7h | fields: ['timestamp', 'status', 'issues', 'warnings', 'stats']",
+      "checked_at": "2026-04-03T23:26:31.219922+00:00",
+      "age_hours": 0.72,
+      "subtitle_match": "mikes-trading-bot",
+      "project_id": "squeeze-prophet",
+      "collected_at": "2026-04-04T00:09:32.021066+00:00"
+    },
+    "kalshi-intelligence": {
+      "health": 0,
+      "status": "docker_not_installed",
+      "details": "Docker not found",
+      "subtitle_match": "claude-kalshi",
+      "project_id": "kalshi-intelligence",
+      "collected_at": "2026-04-04T00:09:32.021066+00:00"
+    },
+    "sentinel-compass": {
+      "health": 90,
+      "status": "active",
+      "details": "DB age: 0.9h | 10 tables",
+      "checked_at": "2026-04-03T23:15:43.079568+00:00",
+      "age_hours": 0.9,
+      "subtitle_match": "sentinel-compass",
+      "project_id": "sentinel-compass",
+      "collected_at": "2026-04-04T00:09:32.021066+00:00"
+    },
+    "intelligence-bridge": {
+      "health": 75,
+      "status": "ok",
+      "details": "File age: 1.0h | fields: ['generated_at', 'systems', 'sector_consensus', 'active_cascades', 'bridge_health']",
+      "checked_at": "2026-04-03T23:11:39.636339+00:00",
+      "age_hours": 0.96,
+      "subtitle_match": "intelligence-bridge",
+      "project_id": "intelligence-bridge",
+      "collected_at": "2026-04-04T00:09:32.021066+00:00"
+    },
+    "moteops-landing": {
+      "health": 100,
+      "status": "up",
+      "details": "HTTP 200",
+      "subtitle_match": "side-gig-bot",
+      "project_id": "moteops-landing",
+      "collected_at": "2026-04-04T00:09:32.021066+00:00"
+    },
+    "project-command-center": {
+      "health": 100,
+      "status": "ok",
+      "details": "self-reporting",
+      "subtitle_match": "project-command-center",
+      "project_id": "project-command-center",
+      "collected_at": "2026-04-04T00:09:32.021066+00:00"
+    }
+  }
+}
