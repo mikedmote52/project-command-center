@@ -370,6 +370,21 @@ const DEFAULT_PROJECTS = [
     lastUpdated: "2026-04-01"
   },
   {
+    name: "Kalshi Intelligence Dashboard",
+    subtitle: "kalshi-dashboard",
+    desc: "GitHub Pages dashboard for Kalshi prediction market intelligence. Reads from the Intelligence Bridge (unified_feed.json, narrative_signals.json) and publishes dashboard_data.json. Human-in-the-loop trade approval UI.",
+    category: "trading",
+    status: "active",
+    health: "auto",
+    nextSteps: "Wire up real-time auto-publish via launchd schedule. Expand approval UI with position sizing controls. Connect to live Kalshi API for contract prices.",
+    tech: ["Python","GitHub Pages","Intelligence Bridge","Kalshi API"],
+    links: [
+      { label: "Live Dashboard", url: "https://mikedmote52.github.io/kalshi-dashboard/", type: "live" },
+      { label: "GitHub", url: "https://github.com/mikedmote52/kalshi-dashboard", type: "repo" }
+    ],
+    lastUpdated: "2026-04-03"
+  },
+  {
     name: "OpenClaw Trader",
     subtitle: "openclaw-trader",
     desc: "Trading system concept. Directory scaffolded, research notes in Idea Lab. Implementation not started.",
