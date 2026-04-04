@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.mikedmote52.health-publisher</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/bin/python3</string>
+        <string>/Users/michaelmote/Desktop/project-command-center/health_publisher.py</string>
+    </array>
+
+    <!-- Run every 15 minutes (900 seconds) -->
+    <key>StartInterval</key>
+    <integer>900</integer>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>/Users/michaelmote/Desktop/project-command-center/health_publisher.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/michaelmote/Desktop/project-command-center/health_publisher.log</string>
+
+    <!-- Keep alive only on failure, not indefinitely -->
+    <key>KeepAlive</key>
+    <dict>
+        <key>SuccessfulExit</key>
+        <false/>
+    </dict>
+</dict>
+</plist>

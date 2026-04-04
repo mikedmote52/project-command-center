@@ -119,11 +119,16 @@ def check_kalshi_intelligence():
     last_data = None
 
     # Docker check
+    DOCKER = (
+        "/usr/local/bin/docker" if Path("/usr/local/bin/docker").exists()
+        else "/opt/homebrew/bin/docker" if Path("/opt/homebrew/bin/docker").exists()
+        else "docker"
+    )
     containers_found = 0
     containers_running = 0
     try:
         proc = subprocess.run(
-            ["docker", "ps", "--filter", "name=kalshi", "--format", "{{json .}}"],
+            [DOCKER, "ps", "--filter", "name=kalshi", "--format", "{{json .}}"],
             capture_output=True, text=True, timeout=10)
         if proc.returncode == 0:
             for line in proc.stdout.strip().splitlines():

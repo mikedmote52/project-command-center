@@ -685,6 +685,8 @@ function renderProjects() {
               <div class="health-bar-bg"><div class="health-bar-fill" style="width:${h}%;background:${hc}"></div></div>
               <div class="health-pct" style="color:${hc}">${h}%</div>
             </div>
+            ${autoEntry?.summary ? `<div class="health-next" style="color:var(--text);"><strong>Live:</strong> ${autoEntry.summary}</div>` : ''}
+            ${autoEntry?.warnings?.length ? `<div class="health-next" style="color:var(--yellow);">&#9888; ${autoEntry.warnings.join(' &middot; ')}</div>` : ''}
             ${p.nextSteps ? `<div class="health-next"><strong>Next:</strong> ${p.nextSteps}</div>` : ''}
             ${buildSignalsHtml(liveData[idx])}
           </div>
