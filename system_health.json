@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-06T09:25:59Z",
+  "generated_at": "2026-04-06T09:41:01Z",
   "projects": {
     "mikes-trading-bot": {
       "health": 55,
@@ -8,11 +8,11 @@
       "last_data": "2026-04-03T23:26:31Z",
       "warnings": [
         "12 errors in log today",
-        "health.json is 3479m old"
+        "health.json is 3494m old"
       ],
       "subtitle_match": "mikes-trading-bot",
       "project_id": "mikes-trading-bot",
-      "collected_at": "2026-04-06T09:25:59Z"
+      "collected_at": "2026-04-06T09:41:01Z"
     },
     "claude-kalshi": {
       "health": 60,
@@ -20,11 +20,11 @@
       "summary": "5/5 containers up, 1 sector signals, 20 opportunities",
       "last_data": "2026-04-06T02:07:04.611159",
       "warnings": [
-        "Last Kalshi analysis 438m ago"
+        "Last Kalshi analysis 453m ago"
       ],
       "subtitle_match": "claude-kalshi",
       "project_id": "claude-kalshi",
-      "collected_at": "2026-04-06T09:25:59Z"
+      "collected_at": "2026-04-06T09:41:01Z"
     },
     "sentinel-compass": {
       "health": 60,
@@ -36,7 +36,7 @@
       ],
       "subtitle_match": "sentinel-compass",
       "project_id": "sentinel-compass",
-      "collected_at": "2026-04-06T09:25:59Z"
+      "collected_at": "2026-04-06T09:41:01Z"
     },
     "intelligence-bridge": {
       "health": 40,
@@ -48,27 +48,27 @@
       ],
       "subtitle_match": "intelligence-bridge",
       "project_id": "intelligence-bridge",
-      "collected_at": "2026-04-06T09:25:59Z"
+      "collected_at": "2026-04-06T09:41:01Z"
     },
     "side-gig-bot": {
       "health": 100,
       "status": "running",
-      "summary": "HTTP 200, 274ms",
-      "last_data": "2026-04-06T09:25:59Z",
+      "summary": "HTTP 200, 243ms",
+      "last_data": "2026-04-06T09:41:01Z",
       "warnings": [],
       "subtitle_match": "side-gig-bot",
       "project_id": "side-gig-bot",
-      "collected_at": "2026-04-06T09:25:59Z"
+      "collected_at": "2026-04-06T09:41:01Z"
     },
     "project-command-center": {
       "health": 100,
       "status": "running",
       "summary": "Health publisher active",
-      "last_data": "2026-04-06T09:25:59Z",
+      "last_data": "2026-04-06T09:41:01Z",
       "warnings": [],
       "subtitle_match": "project-command-center",
       "project_id": "project-command-center",
-      "collected_at": "2026-04-06T09:25:59Z"
+      "collected_at": "2026-04-06T09:41:01Z"
     }
   }
 }
