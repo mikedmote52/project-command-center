@@ -360,30 +360,19 @@ const DEFAULT_PROJECTS = [
   {
     name: "Kalshi Bot",
     subtitle: "claude-kalshi",
-    desc: "Prediction market analysis system for Kalshi. Identifies mispriced contracts using sentiment analysis and event data. Feeds signals into the Intelligence Bridge for cross-system aggregation.",
+    desc: "Prediction market analysis system for Kalshi Intelligence Dashboard. Identifies mispriced contracts using sentiment analysis and event data. Feeds signals into the Intelligence Bridge for cross-system aggregation.",
     category: "trading",
     status: "development",
-    health: 35,
-    nextSteps: "Build contract scanner module. Wire up Kalshi API auth flow. Define signal format for Intelligence Bridge integration.",
-    tech: ["Python","Kalshi API","Claude API"],
-    links: [],
-    lastUpdated: "2026-04-01"
-  },
-  {
-    name: "Kalshi Intelligence Dashboard",
-    subtitle: "kalshi-dashboard",
-    desc: "GitHub Pages dashboard for Kalshi prediction market intelligence. Reads from the Intelligence Bridge (unified_feed.json, narrative_signals.json) and publishes dashboard_data.json. Human-in-the-loop trade approval UI.",
-    category: "trading",
-    status: "active",
-    health: "auto",
-    nextSteps: "Wire up real-time auto-publish via launchd schedule. Expand approval UI with position sizing controls. Connect to live Kalshi API for contract prices.",
-    tech: ["Python","GitHub Pages","Intelligence Bridge","Kalshi API"],
+    health: 70,
+    nextSteps: "Deploy upgraded analyzers and trading engine. Connect Kalshi API credentials. Close feedback loop with Brier scoring.",
+    tech: ["Python","Kalshi API","Claude API","Intelligence Bridge","Telegram"],
     links: [
       { label: "Live Dashboard", url: "https://mikedmote52.github.io/kalshi-dashboard/", type: "live" },
       { label: "GitHub", url: "https://github.com/mikedmote52/kalshi-dashboard", type: "repo" }
     ],
-    lastUpdated: "2026-04-03"
+    lastUpdated: "2026-04-05"
   },
+
   {
     name: "OpenClaw Trader",
     subtitle: "openclaw-trader",
@@ -403,10 +392,10 @@ const DEFAULT_PROJECTS = [
     category: "ai",
     status: "development",
     health: 55,
-    nextSteps: "Finish Kalshi publisher module. Add dashboard feed consumer endpoint. Stress test failover when individual systems go offline.",
+    nextSteps: "Run fresh intelligence cycle with upgraded domain analyzers. Verify unified feed generation. Stress test new position monitor and resolution tracker.",
     tech: ["Python","Subprocess Orchestration","Modular Publishers"],
     links: [],
-    lastUpdated: "2026-04-03"
+    lastUpdated: "2026-04-05"
   },
   {
     name: "SentinelCompass",
