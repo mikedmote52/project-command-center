@@ -374,30 +374,6 @@ const DEFAULT_PROJECTS = [
   },
 
   {
-    name: "OpenClaw Trader",
-    subtitle: "openclaw-trader",
-    desc: "Trading system concept. Directory scaffolded, research notes in Idea Lab. Implementation not started.",
-    category: "trading",
-    status: "paused",
-    health: 5,
-    nextSteps: "Define trading thesis and target market. Pull research from Idea Lab vault into a spec doc. Decide if this merges into Squeeze Prophet or stays standalone.",
-    tech: [],
-    links: [],
-    lastUpdated: "2026-04-02"
-  },
-  {
-    name: "Intelligence Bridge",
-    subtitle: "intelligence-bridge",
-    desc: "Daemon orchestrating Kalshi, SentinelCompass, and Squeeze Bot into one unified intelligence feed. Adaptive polling: 15min market hours, 60min after-hours, 4hr overnight. Additive design so each system runs independently if bridge fails.",
-    category: "ai",
-    status: "development",
-    health: 55,
-    nextSteps: "Run fresh intelligence cycle with upgraded domain analyzers. Verify unified feed generation. Stress test new position monitor and resolution tracker.",
-    tech: ["Python","Subprocess Orchestration","Modular Publishers"],
-    links: [],
-    lastUpdated: "2026-04-05"
-  },
-  {
     name: "SentinelCompass",
     subtitle: "sentinel-compass",
     desc: "Political intelligence briefing system. 4-module pipeline: Claim Extractor, Claim Verifier, Pattern Matcher (8 authoritarian playbooks), Voice Adapter (complexity levels 1-4). 50 tiered news sources.",
@@ -460,33 +436,6 @@ const DEFAULT_PROJECTS = [
     lastUpdated: "2026-03-29"
   },
   {
-    name: "LeadRevive",
-    subtitle: "leadrevive",
-    desc: "AI outreach template system with revenue analytics dashboard. Dark-themed UI for managing outreach campaigns and tracking conversion metrics. Standalone HTML prototypes.",
-    category: "business",
-    status: "prototype",
-    health: 30,
-    nextSteps: "Convert standalone HTML into a deployable app. Add backend for template storage and campaign tracking. Define outreach funnel metrics.",
-    tech: ["HTML/CSS/JS","Dashboard Analytics"],
-    links: [],
-    lastUpdated: "2026-04-02"
-  },
-  {
-    name: "Moving Mountains",
-    subtitle: "moving-mountains-site",
-    desc: "Marketing website for mobile vet rehab and staffing service in Denver. Glassmorphic design, Tailwind CSS, intersection observer animations. Forest/terra/sage color palette.",
-    category: "business",
-    status: "production",
-    health: 90,
-    nextSteps: "Connect a custom domain. Add contact form backend. Consider adding a blog or testimonials section.",
-    tech: ["HTML5","Tailwind CSS","Custom Animations"],
-    links: [
-      { label: "Live Site", url: "https://mikedmote52.github.io/moving-mountains-demo/", type: "live" },
-      { label: "GitHub", url: "https://github.com/mikedmote52/moving-mountains-demo", type: "repo" }
-    ],
-    lastUpdated: "2026-04-01"
-  },
-  {
     name: "LearnEngine",
     subtitle: "learn-engine",
     desc: "Adaptive learning system converting YouTube videos into AI-analyzed quizzes with spaced repetition. Flask + Claude API backend. Security audit flagged 3 critical issues: plaintext API key, debug mode in prod, stored XSS.",
@@ -515,88 +464,6 @@ const DEFAULT_PROJECTS = [
     ],
     lastUpdated: "2026-04-03"
   },
-  {
-    name: "Mike's Budget",
-    subtitle: "mikes-budget",
-    desc: "Personal budget tracking and financial analysis. Daily tracker spreadsheet, monthly analysis, spending categorization from bank CSVs.",
-    category: "personal",
-    status: "active",
-    health: 50,
-    nextSteps: "Update with March and April transactions. Reconcile bank CSV against tracker. Review spending trends and adjust budget targets.",
-    tech: ["Excel","CSV","PDF Reports"],
-    links: [],
-    lastUpdated: "2026-03-12"
-  },
-  {
-    name: "EKG Clinical Simulator",
-    subtitle: "ekg-clinical-simulation",
-    desc: "Clinical-grade EKG simulation with real-time 3D heart visualization and adaptive educational narration. Multi-agent orchestration for medical accuracy with comprehensive validation.",
-    category: "tools",
-    status: "prototype",
-    health: 45,
-    nextSteps: "Enable GitHub Pages for live demo. Test multi-agent orchestration pipeline end-to-end. Add more EKG pattern scenarios.",
-    tech: ["TypeScript","3D Visualization","Multi-Agent AI"],
-    links: [
-      { label: "GitHub", url: "https://github.com/mikedmote52/ekg-clinical-simulation-engine", type: "repo" }
-    ],
-    lastUpdated: "2026-02-20"
-  },
-  {
-    name: "Squeeze Prophet (Original)",
-    subtitle: "squeeze-prophet",
-    desc: "Original explosive squeeze detection system targeting +63.8% returns. Private repo, predecessor to the current mikes-trading-bot-dashboard.",
-    category: "trading",
-    status: "paused",
-    health: 60,
-    nextSteps: "Consolidate any remaining logic into the active trading bot. Archive or merge.",
-    tech: ["Python","Alpaca","Squeeze Detection"],
-    links: [
-      { label: "GitHub (private)", url: "https://github.com/mikedmote52/squeeze-prophet", type: "repo" }
-    ],
-    lastUpdated: "2025-10-09"
-  },
-  {
-    name: "Daily Trading",
-    subtitle: "daily-trading",
-    desc: "Automated stock discovery and Alpaca paper trading system. Earlier iteration of the trading bot concept.",
-    category: "trading",
-    status: "paused",
-    health: 40,
-    nextSteps: "Review for any reusable discovery logic. Merge useful parts into Squeeze Prophet.",
-    tech: ["Python","Alpaca API"],
-    links: [
-      { label: "GitHub", url: "https://github.com/mikedmote52/daily-trading", type: "repo" }
-    ],
-    lastUpdated: "2025-10-09"
-  },
-  {
-    name: "AMC Trader",
-    subtitle: "amc-trader",
-    desc: "Specialized trading bot for AMC stock patterns. Python-based.",
-    category: "trading",
-    status: "paused",
-    health: 30,
-    nextSteps: "Evaluate if thesis is still valid. Merge pattern logic into main bot or archive.",
-    tech: ["Python"],
-    links: [
-      { label: "GitHub", url: "https://github.com/mikedmote52/AMC-trader", type: "repo" }
-    ],
-    lastUpdated: "2026-03-29"
-  },
-  {
-    name: "Mote Vet Site",
-    subtitle: "mote-vet-site",
-    desc: "Veterinary relief services staffing platform. TypeScript-based. Private repo.",
-    category: "business",
-    status: "paused",
-    health: 35,
-    nextSteps: "Determine relationship with Moving Mountains site. Consolidate or sunset.",
-    tech: ["TypeScript"],
-    links: [
-      { label: "GitHub (private)", url: "https://github.com/mikedmote52/mote-vet-site", type: "repo" }
-    ],
-    lastUpdated: "2026-02-19"
-  }
 ];
 
 function loadProjects() {

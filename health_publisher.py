@@ -366,7 +366,6 @@ CHECKS = [
     ("mikes-trading-bot",      "Squeeze Prophet",        check_squeeze_prophet),
     ("claude-kalshi",          "Kalshi Intelligence",    check_kalshi_intelligence),
     ("sentinel-compass",       "SentinelCompass",        check_sentinelcompass),
-    ("intelligence-bridge",    "Intelligence Bridge",    check_intelligence_bridge),
     ("side-gig-bot",           "Mote Ops Landing",       check_mote_ops_landing),
     ("project-command-center", "Project Command Center", check_project_command_center),
 ]
