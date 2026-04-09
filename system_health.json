@@ -1,18 +1,18 @@
 {
-  "generated_at": "2026-04-09T21:05:55Z",
+  "generated_at": "2026-04-09T21:20:58Z",
   "projects": {
     "mikes-trading-bot": {
-      "health": 75,
+      "health": 80,
       "status": "running",
-      "summary": "13 positions, equity $100.5K, P&L +0.5%, 1 trailing winner",
-      "last_data": "2026-04-07T01:26:34Z",
+      "summary": "11 positions, equity $100.5K, P&L +0.5%, 1 trailing winner",
+      "last_data": "2026-04-09T21:06:20Z",
       "warnings": [
-        "Near hard stop: FCUV (-31.1%), JELD (-12.1%), PFSA (-17.5%)",
-        "health.json is 4059m old"
+        "Near hard stop: BCG (-14.0%), PFSA (-43.2%)",
+        "17 errors in log today"
       ],
       "subtitle_match": "mikes-trading-bot",
       "project_id": "mikes-trading-bot",
-      "collected_at": "2026-04-09T21:05:54Z"
+      "collected_at": "2026-04-09T21:20:57Z"
     },
     "claude-kalshi": {
       "health": 25,
@@ -22,7 +22,7 @@
       "warnings": [],
       "subtitle_match": "claude-kalshi",
       "project_id": "claude-kalshi",
-      "collected_at": "2026-04-09T21:05:55Z"
+      "collected_at": "2026-04-09T21:20:58Z"
     },
     "sentinel-compass": {
       "health": 60,
@@ -30,31 +30,31 @@
       "summary": "18 entities, 18 market signals, 2 briefings, 15 events",
       "last_data": "2026-04-03T23:15:43Z",
       "warnings": [
-        "DB last updated 141h ago"
+        "DB last updated 142h ago"
       ],
       "subtitle_match": "sentinel-compass",
       "project_id": "sentinel-compass",
-      "collected_at": "2026-04-09T21:05:55Z"
+      "collected_at": "2026-04-09T21:20:58Z"
     },
     "side-gig-bot": {
       "health": 100,
       "status": "running",
-      "summary": "HTTP 200, 201ms",
-      "last_data": "2026-04-09T21:05:55Z",
+      "summary": "HTTP 200, 211ms",
+      "last_data": "2026-04-09T21:20:58Z",
       "warnings": [],
       "subtitle_match": "side-gig-bot",
       "project_id": "side-gig-bot",
-      "collected_at": "2026-04-09T21:05:55Z"
+      "collected_at": "2026-04-09T21:20:58Z"
     },
     "project-command-center": {
       "health": 100,
       "status": "running",
       "summary": "Health publisher active",
-      "last_data": "2026-04-09T21:05:55Z",
+      "last_data": "2026-04-09T21:20:58Z",
       "warnings": [],
       "subtitle_match": "project-command-center",
       "project_id": "project-command-center",
-      "collected_at": "2026-04-09T21:05:55Z"
+      "collected_at": "2026-04-09T21:20:58Z"
     }
   }
 }
