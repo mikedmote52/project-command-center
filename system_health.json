@@ -1,30 +1,28 @@
 {
-  "generated_at": "2026-04-06T20:57:55Z",
+  "generated_at": "2026-04-09T19:50:42Z",
   "projects": {
     "mikes-trading-bot": {
-      "health": 55,
+      "health": 75,
       "status": "running",
-      "summary": "10 positions, equity $100.5K, P&L +0.5%, 2 trailing winners",
-      "last_data": "2026-04-03T23:26:31Z",
+      "summary": "13 positions, equity $100.5K, P&L +0.5%, 1 trailing winner",
+      "last_data": "2026-04-07T01:26:34Z",
       "warnings": [
-        "12 errors in log today",
-        "health.json is 4171m old"
+        "Near hard stop: FCUV (-31.1%), JELD (-12.1%), PFSA (-17.5%)",
+        "health.json is 3984m old"
       ],
       "subtitle_match": "mikes-trading-bot",
       "project_id": "mikes-trading-bot",
-      "collected_at": "2026-04-06T20:57:55Z"
+      "collected_at": "2026-04-09T19:50:41Z"
     },
     "claude-kalshi": {
-      "health": 60,
-      "status": "running",
-      "summary": "5/5 containers up, 1 sector signals, 20 opportunities",
-      "last_data": "2026-04-06T13:53:30.538808",
-      "warnings": [
-        "Last Kalshi analysis 424m ago"
-      ],
+      "health": 25,
+      "status": "offline",
+      "summary": "No Kalshi containers running",
+      "last_data": null,
+      "warnings": [],
       "subtitle_match": "claude-kalshi",
       "project_id": "claude-kalshi",
-      "collected_at": "2026-04-06T20:57:55Z"
+      "collected_at": "2026-04-09T19:50:42Z"
     },
     "sentinel-compass": {
       "health": 60,
@@ -32,43 +30,31 @@
       "summary": "18 entities, 18 market signals, 2 briefings, 15 events",
       "last_data": "2026-04-03T23:15:43Z",
       "warnings": [
-        "DB last updated 69h ago"
+        "DB last updated 140h ago"
       ],
       "subtitle_match": "sentinel-compass",
       "project_id": "sentinel-compass",
-      "collected_at": "2026-04-06T20:57:55Z"
-    },
-    "intelligence-bridge": {
-      "health": 40,
-      "status": "stale",
-      "summary": "3/3 systems live, 64 total signals",
-      "last_data": "2026-04-06T13:53:31.773164",
-      "warnings": [
-        "Feed last updated 7h ago"
-      ],
-      "subtitle_match": "intelligence-bridge",
-      "project_id": "intelligence-bridge",
-      "collected_at": "2026-04-06T20:57:55Z"
+      "collected_at": "2026-04-09T19:50:42Z"
     },
     "side-gig-bot": {
       "health": 100,
       "status": "running",
-      "summary": "HTTP 200, 221ms",
-      "last_data": "2026-04-06T20:57:55Z",
+      "summary": "HTTP 200, 193ms",
+      "last_data": "2026-04-09T19:50:42Z",
       "warnings": [],
       "subtitle_match": "side-gig-bot",
       "project_id": "side-gig-bot",
-      "collected_at": "2026-04-06T20:57:55Z"
+      "collected_at": "2026-04-09T19:50:42Z"
     },
     "project-command-center": {
       "health": 100,
       "status": "running",
       "summary": "Health publisher active",
-      "last_data": "2026-04-06T20:57:55Z",
+      "last_data": "2026-04-09T19:50:42Z",
       "warnings": [],
       "subtitle_match": "project-command-center",
       "project_id": "project-command-center",
-      "collected_at": "2026-04-06T20:57:55Z"
+      "collected_at": "2026-04-09T19:50:42Z"
     }
   }
 }
