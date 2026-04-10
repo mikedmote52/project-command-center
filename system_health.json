@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-10T07:23:00Z",
+  "generated_at": "2026-04-10T07:38:03Z",
   "projects": {
     "mikes-trading-bot": {
       "health": 55,
@@ -9,11 +9,11 @@
       "warnings": [
         "Near hard stop: BCG (-14.0%), PFSA (-43.2%)",
         "17 errors in log today",
-        "health.json is 616m old"
+        "health.json is 631m old"
       ],
       "subtitle_match": "mikes-trading-bot",
       "project_id": "mikes-trading-bot",
-      "collected_at": "2026-04-10T07:22:59Z"
+      "collected_at": "2026-04-10T07:38:02Z"
     },
     "claude-kalshi": {
       "health": 25,
@@ -23,7 +23,7 @@
       "warnings": [],
       "subtitle_match": "claude-kalshi",
       "project_id": "claude-kalshi",
-      "collected_at": "2026-04-10T07:23:00Z"
+      "collected_at": "2026-04-10T07:38:03Z"
     },
     "sentinel-compass": {
       "health": 60,
@@ -35,27 +35,27 @@
       ],
       "subtitle_match": "sentinel-compass",
       "project_id": "sentinel-compass",
-      "collected_at": "2026-04-10T07:23:00Z"
+      "collected_at": "2026-04-10T07:38:03Z"
     },
     "side-gig-bot": {
       "health": 100,
       "status": "running",
-      "summary": "HTTP 200, 206ms",
-      "last_data": "2026-04-10T07:23:00Z",
+      "summary": "HTTP 200, 236ms",
+      "last_data": "2026-04-10T07:38:03Z",
       "warnings": [],
       "subtitle_match": "side-gig-bot",
       "project_id": "side-gig-bot",
-      "collected_at": "2026-04-10T07:23:00Z"
+      "collected_at": "2026-04-10T07:38:03Z"
     },
     "project-command-center": {
       "health": 100,
       "status": "running",
       "summary": "Health publisher active",
-      "last_data": "2026-04-10T07:23:00Z",
+      "last_data": "2026-04-10T07:38:03Z",
       "warnings": [],
       "subtitle_match": "project-command-center",
       "project_id": "project-command-center",
-      "collected_at": "2026-04-10T07:23:00Z"
+      "collected_at": "2026-04-10T07:38:03Z"
     }
   }
 }
