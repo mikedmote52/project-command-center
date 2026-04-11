@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-11T18:45:25Z",
+  "generated_at": "2026-04-11T19:00:28Z",
   "projects": {
     "mikes-trading-bot": {
       "health": 70,
@@ -12,7 +12,7 @@
       ],
       "subtitle_match": "mikes-trading-bot",
       "project_id": "mikes-trading-bot",
-      "collected_at": "2026-04-11T18:45:24Z"
+      "collected_at": "2026-04-11T19:00:27Z"
     },
     "claude-kalshi": {
       "health": 25,
@@ -22,7 +22,7 @@
       "warnings": [],
       "subtitle_match": "claude-kalshi",
       "project_id": "claude-kalshi",
-      "collected_at": "2026-04-11T18:45:25Z"
+      "collected_at": "2026-04-11T19:00:28Z"
     },
     "sentinel-compass": {
       "health": 60,
@@ -34,27 +34,27 @@
       ],
       "subtitle_match": "sentinel-compass",
       "project_id": "sentinel-compass",
-      "collected_at": "2026-04-11T18:45:25Z"
+      "collected_at": "2026-04-11T19:00:28Z"
     },
     "side-gig-bot": {
       "health": 100,
       "status": "running",
-      "summary": "HTTP 200, 170ms",
-      "last_data": "2026-04-11T18:45:25Z",
+      "summary": "HTTP 200, 157ms",
+      "last_data": "2026-04-11T19:00:28Z",
       "warnings": [],
       "subtitle_match": "side-gig-bot",
       "project_id": "side-gig-bot",
-      "collected_at": "2026-04-11T18:45:25Z"
+      "collected_at": "2026-04-11T19:00:28Z"
     },
     "project-command-center": {
       "health": 100,
       "status": "running",
       "summary": "Health publisher active",
-      "last_data": "2026-04-11T18:45:25Z",
+      "last_data": "2026-04-11T19:00:28Z",
       "warnings": [],
       "subtitle_match": "project-command-center",
       "project_id": "project-command-center",
-      "collected_at": "2026-04-11T18:45:25Z"
+      "collected_at": "2026-04-11T19:00:28Z"
     }
   }
 }
