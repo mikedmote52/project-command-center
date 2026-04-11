@@ -1,0 +1,225 @@
+# External Watchdog
+# =================
+# This workflow runs on GitHub's infrastructure every 15 minutes. It reads
+# the published system_health.json from the project-command-center repo
+# (via GitHub Pages, so no auth needed) and checks whether the publisher
+# heartbeat is stale.
+#
+# If the heartbeat is stale, it opens (or updates) a GitHub Issue titled
+# "Publisher heartbeat stale" so you get an email and a visible red flag.
+# If the heartbeat recovers, it closes the issue automatically.
+#
+# This is the layer that catches the exact failure mode where your MacBook
+# sleeps, reboots, or the launchd job silently dies. GitHub Actions does
+# not depend on your hardware being up, so it cannot die the same way
+# your laptop does.
+#
+# INSTALL
+# -------
+# 1. Put this file at .github/workflows/external-watchdog.yml in ANY repo
+#    you own that has Actions enabled. Recommended: project-command-center
+#    itself, so the watchdog and the monitored data live together.
+# 2. Commit and push.
+# 3. First run will happen within ~5 min. After that every 15 min.
+# 4. Check the Actions tab in GitHub to see it running.
+#
+# NO SECRETS NEEDED. It uses the repo's built-in GITHUB_TOKEN.
+
+name: External Watchdog
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  check-heartbeat:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch published system_health.json
+        id: fetch
+        run: |
+          set -e
+          URL="https://mikedmote52.github.io/project-command-center/system_health.json"
+          HB_URL="https://mikedmote52.github.io/project-command-center/heartbeat.json"
+
+          echo "Fetching $URL"
+          curl -sSL --max-time 30 "$URL" -o health.json || {
+            echo "FETCH_FAILED=1" >> "$GITHUB_OUTPUT"
+            echo "REASON=cannot fetch system_health.json from Pages" >> "$GITHUB_OUTPUT"
+            exit 0
+          }
+
+          echo "Fetching $HB_URL"
+          curl -sSL --max-time 30 "$HB_URL" -o heartbeat.json || echo '{}' > heartbeat.json
+
+          python3 <<'PY'
+          import json, os, sys
+          from datetime import datetime, timezone
+
+          STALE_MIN_WARN = 30
+          STALE_MIN_DEAD = 60
+
+          out_path = os.environ["GITHUB_OUTPUT"]
+
+          def write(k, v):
+              with open(out_path, "a") as f:
+                  f.write(f"{k}={v}\n")
+
+          try:
+              with open("health.json") as f:
+                  health = json.load(f)
+          except Exception as e:
+              write("FETCH_FAILED", "1")
+              write("REASON", f"parse error: {e}")
+              sys.exit(0)
+
+          raw = health.get("generated_at") or ""
+          if not raw:
+              write("STATE", "broken")
+              write("REASON", "system_health.json has no generated_at field")
+              sys.exit(0)
+
+          try:
+              if raw.endswith("Z"):
+                  raw = raw[:-1] + "+00:00"
+              ts = datetime.fromisoformat(raw)
+          except Exception as e:
+              write("STATE", "broken")
+              write("REASON", f"bad timestamp: {raw}")
+              sys.exit(0)
+
+          age_sec = (datetime.now(timezone.utc) - ts.astimezone(timezone.utc)).total_seconds()
+          age_min = int(age_sec / 60)
+
+          # Also check the heartbeat file if present
+          hb_msg = ""
+          try:
+              with open("heartbeat.json") as f:
+                  hb = json.load(f)
+              if not hb.get("success", True):
+                  hb_msg = f" Publisher reported: {hb.get('message', '')}"
+          except Exception:
+              pass
+
+          offline = []
+          for name, p in (health.get("projects") or {}).items():
+              if not isinstance(p, dict):
+                  continue
+              if p.get("status") == "offline" or (isinstance(p.get("health"), (int, float)) and p["health"] < 40):
+                  offline.append(f"{name}({p.get('status','?')}, h={p.get('health','?')})")
+
+          write("AGE_MIN", str(age_min))
+          write("OFFLINE_COUNT", str(len(offline)))
+          write("OFFLINE_LIST", ", ".join(offline) if offline else "none")
+          write("HB_MSG", hb_msg)
+
+          if age_min >= STALE_MIN_DEAD:
+              write("STATE", "dead")
+              write("REASON", f"Publisher heartbeat is {age_min}m stale (>= {STALE_MIN_DEAD}m).{hb_msg}")
+          elif age_min >= STALE_MIN_WARN:
+              write("STATE", "stale")
+              write("REASON", f"Publisher heartbeat is {age_min}m stale (>= {STALE_MIN_WARN}m).{hb_msg}")
+          elif offline:
+              write("STATE", "degraded")
+              write("REASON", f"Publisher fresh ({age_min}m old) but offline: {', '.join(offline)}.{hb_msg}")
+          else:
+              write("STATE", "healthy")
+              write("REASON", f"All good. Age {age_min}m. {len(offline)} offline.")
+          PY
+
+      - name: Open or update issue on failure
+        if: ${{ steps.fetch.outputs.STATE == 'dead' || steps.fetch.outputs.STATE == 'stale' || steps.fetch.outputs.FETCH_FAILED == '1' || steps.fetch.outputs.STATE == 'broken' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const state  = '${{ steps.fetch.outputs.STATE }}' || 'fetch-failed';
+            const reason = `${{ steps.fetch.outputs.REASON }}`;
+            const title  = `[watchdog] Publisher heartbeat ${state}`;
+            const body = [
+              `**State:** ${state}`,
+              `**Reason:** ${reason}`,
+              `**Offline projects:** ${{ steps.fetch.outputs.OFFLINE_LIST }}`,
+              ``,
+              `The external watchdog detected that the MacBook-side health_publisher is not producing fresh output.`,
+              ``,
+              `**Check these in order:**`,
+              `1. Is the MacBook awake?`,
+              `2. Run: \`launchctl list | grep health-publisher\``,
+              `3. Check: \`tail -50 ~/Desktop/project-command-center/publisher.log\``,
+              `4. Manually run: \`python3 ~/Desktop/project-command-center/health_publisher.py\``,
+              `5. Check Docker for Kalshi containers: \`docker ps | grep kalshi\``,
+              ``,
+              `_This issue is auto-managed by .github/workflows/external-watchdog.yml_`
+            ].join('\n');
+
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              state: 'open',
+              labels: 'watchdog'
+            });
+
+            const existing = issues.find(i => i.title.startsWith('[watchdog] Publisher heartbeat'));
+            if (existing) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo:  context.repo.repo,
+                issue_number: existing.number,
+                title,
+                body
+              });
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo:  context.repo.repo,
+                issue_number: existing.number,
+                body: `Still ${state} at ${new Date().toISOString()}. ${reason}`
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo:  context.repo.repo,
+                title,
+                body,
+                labels: ['watchdog', 'reliability']
+              });
+            }
+
+      - name: Close issue on recovery
+        if: ${{ steps.fetch.outputs.STATE == 'healthy' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              state: 'open',
+              labels: 'watchdog'
+            });
+            for (const i of issues) {
+              if (i.title.startsWith('[watchdog] Publisher heartbeat')) {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo:  context.repo.repo,
+                  issue_number: i.number,
+                  body: `Recovered at ${new Date().toISOString()}. Age ${{ steps.fetch.outputs.AGE_MIN }}m. Closing.`
+                });
+                await github.rest.issues.update({
+                  owner: context.repo.owner,
+                  repo:  context.repo.repo,
+                  issue_number: i.number,
+                  state: 'closed'
+                });
+              }
+            }
+
+      - name: Fail job if dead (so Actions shows red)
+        if: ${{ steps.fetch.outputs.STATE == 'dead' || steps.fetch.outputs.FETCH_FAILED == '1' }}
+        run: |
+          echo "Watchdog state: ${{ steps.fetch.outputs.STATE }}"
+          echo "Reason: ${{ steps.fetch.outputs.REASON }}"
+          exit 1
