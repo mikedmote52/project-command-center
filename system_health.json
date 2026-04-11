@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-11T18:15:15Z",
+  "generated_at": "2026-04-11T18:30:22Z",
   "projects": {
     "mikes-trading-bot": {
       "health": 80,
@@ -12,7 +12,7 @@
       ],
       "subtitle_match": "mikes-trading-bot",
       "project_id": "mikes-trading-bot",
-      "collected_at": "2026-04-11T18:15:07Z"
+      "collected_at": "2026-04-11T18:30:21Z"
     },
     "claude-kalshi": {
       "health": 25,
@@ -22,7 +22,7 @@
       "warnings": [],
       "subtitle_match": "claude-kalshi",
       "project_id": "claude-kalshi",
-      "collected_at": "2026-04-11T18:15:14Z"
+      "collected_at": "2026-04-11T18:30:22Z"
     },
     "sentinel-compass": {
       "health": 60,
@@ -30,31 +30,31 @@
       "summary": "18 entities, 18 market signals, 2 briefings, 15 events",
       "last_data": "2026-04-03T23:15:43Z",
       "warnings": [
-        "DB last updated 186h ago"
+        "DB last updated 187h ago"
       ],
       "subtitle_match": "sentinel-compass",
       "project_id": "sentinel-compass",
-      "collected_at": "2026-04-11T18:15:14Z"
+      "collected_at": "2026-04-11T18:30:22Z"
     },
     "side-gig-bot": {
       "health": 100,
       "status": "running",
-      "summary": "HTTP 200, 295ms",
-      "last_data": "2026-04-11T18:15:15Z",
+      "summary": "HTTP 200, 175ms",
+      "last_data": "2026-04-11T18:30:22Z",
       "warnings": [],
       "subtitle_match": "side-gig-bot",
       "project_id": "side-gig-bot",
-      "collected_at": "2026-04-11T18:15:15Z"
+      "collected_at": "2026-04-11T18:30:22Z"
     },
     "project-command-center": {
       "health": 100,
       "status": "running",
       "summary": "Health publisher active",
-      "last_data": "2026-04-11T18:15:15Z",
+      "last_data": "2026-04-11T18:30:22Z",
       "warnings": [],
       "subtitle_match": "project-command-center",
       "project_id": "project-command-center",
-      "collected_at": "2026-04-11T18:15:15Z"
+      "collected_at": "2026-04-11T18:30:22Z"
     }
   }
 }
