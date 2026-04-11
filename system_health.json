@@ -1,61 +1,66 @@
 {
-  "generated_at": "2026-04-11T19:30:34Z",
+  "generated_at": "2026-04-11T19:43:04+00:00",
+  "version": "2.0",
   "projects": {
     "mikes-trading-bot": {
-      "health": 70,
-      "status": "running",
-      "summary": "8 positions, equity $100.5K, P&L +0.5%, 1 trailing winner",
-      "last_data": "2026-04-11T18:08:45Z",
+      "status": "offline",
+      "health": 15,
+      "last_updated_age_min": 94.3,
       "warnings": [
         "Near hard stop: CTXR (-9.2%)",
-        "17 errors in log today",
-        "health.json is 81m old"
+        "17 errors in log today"
       ],
-      "subtitle_match": "mikes-trading-bot",
-      "project_id": "mikes-trading-bot",
-      "collected_at": "2026-04-11T19:30:32Z"
+      "notes": "source=health.json"
     },
     "claude-kalshi": {
-      "health": 25,
       "status": "offline",
-      "summary": "No Kalshi containers running",
-      "last_data": null,
-      "warnings": [],
-      "subtitle_match": "claude-kalshi",
-      "project_id": "claude-kalshi",
-      "collected_at": "2026-04-11T19:30:34Z"
+      "health": 20,
+      "containers": [],
+      "warnings": [
+        "No Kalshi containers running"
+      ]
     },
     "sentinel-compass": {
-      "health": 60,
-      "status": "running",
-      "summary": "18 entities, 18 market signals, 2 briefings, 15 events",
-      "last_data": "2026-04-03T23:15:43Z",
+      "status": "offline",
+      "health": 15,
+      "db_age_min": 11307.4,
       "warnings": [
-        "DB last updated 188h ago"
-      ],
-      "subtitle_match": "sentinel-compass",
-      "project_id": "sentinel-compass",
-      "collected_at": "2026-04-11T19:30:34Z"
+        "DB last updated 188.5h ago"
+      ]
+    },
+    "intelligence-bridge": {
+      "status": "offline",
+      "health": 0,
+      "feed_age_min": null,
+      "warnings": [
+        "unified_feed.json unreadable"
+      ]
+    },
+    "stuart-house-manager": {
+      "status": "offline",
+      "health": 15,
+      "data_age_min": 2796.7,
+      "prospect_count": 5,
+      "pending_prospects": 0,
+      "warnings": [
+        "3 listings have logged-out platform sessions",
+        "sweep data 46.6h stale"
+      ]
     },
     "side-gig-bot": {
+      "status": "online",
       "health": 100,
-      "status": "running",
-      "summary": "HTTP 200, 206ms",
-      "last_data": "2026-04-11T19:30:34Z",
-      "warnings": [],
-      "subtitle_match": "side-gig-bot",
-      "project_id": "side-gig-bot",
-      "collected_at": "2026-04-11T19:30:34Z"
+      "http_code": 200,
+      "warnings": []
     },
     "project-command-center": {
+      "status": "online",
       "health": 100,
-      "status": "running",
-      "summary": "Health publisher active",
-      "last_data": "2026-04-11T19:30:34Z",
-      "warnings": [],
-      "subtitle_match": "project-command-center",
-      "project_id": "project-command-center",
-      "collected_at": "2026-04-11T19:30:34Z"
+      "warnings": []
     }
-  }
+  },
+  "failures": [],
+  "ok_count": 2,
+  "checks_executed": 7,
+  "total": 7
 }
