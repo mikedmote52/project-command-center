@@ -147,6 +147,149 @@
 </style>
 </head>
 <body>
+<!--
+  PROJECT COMMAND CENTER STALENESS BANNER
+  Inject immediately after <body> in index.html.
+
+  This is the meta-dashboard. It already reads system_health.json, which is
+  the heartbeat output from health_publisher.py running under launchd on
+  the MacBook. If that publisher dies, system_health.json freezes, and every
+  green light on the page becomes a lie. That's the failure class this
+  banner catches.
+
+  The launchd cadence is 15 minutes. Thresholds below reflect that.
+
+    WARN_MINUTES  = 25   (missed one cycle)
+    STALE_MINUTES = 45   (missed three cycles)
+    DEAD_MINUTES  = 120  (publisher is gone)
+-->
+<style>
+  #pcc-staleness-banner {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 99999;
+    padding: 14px 20px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+    display: none;
+  }
+  #pcc-staleness-banner.visible { display: block; }
+  #pcc-staleness-banner.warn   { background: #b58900; }
+  #pcc-staleness-banner.stale  { background: #c0392b; }
+  #pcc-staleness-banner.dead   { background: #8b0000; animation: pcc-pulse 1s infinite; }
+  #pcc-staleness-banner.fetch-fail { background: #4a0e4e; }
+  #pcc-staleness-banner .subline {
+    display: block;
+    font-size: 12px;
+    font-weight: 400;
+    margin-top: 4px;
+    opacity: 0.92;
+  }
+  @keyframes pcc-pulse {
+    0%, 100% { background: #8b0000; }
+    50%      { background: #ff1a1a; }
+  }
+  body.pcc-banner-visible { padding-top: 76px; }
+</style>
+
+<div id="pcc-staleness-banner" role="alert" aria-live="assertive">
+  <span id="pcc-staleness-headline">Checking publisher heartbeat…</span>
+  <span class="subline" id="pcc-staleness-subline"></span>
+</div>
+
+<script>
+(function () {
+  var WARN_MINUTES  = 25;
+  var STALE_MINUTES = 45;
+  var DEAD_MINUTES  = 120;
+  var POLL_INTERVAL_MS = 60 * 1000;
+  var HEALTH_URL = 'system_health.json';
+
+  var banner   = document.getElementById('pcc-staleness-banner');
+  var headline = document.getElementById('pcc-staleness-headline');
+  var subline  = document.getElementById('pcc-staleness-subline');
+
+  function setState(cls, head, sub) {
+    banner.className = '';
+    banner.classList.add('visible', cls);
+    document.body.classList.add('pcc-banner-visible');
+    headline.textContent = head;
+    subline.textContent = sub || '';
+  }
+  function hide() {
+    banner.className = '';
+    document.body.classList.remove('pcc-banner-visible');
+  }
+  function fmtAge(min) {
+    if (min < 60) return min + ' min';
+    var h = Math.floor(min / 60);
+    var m = min % 60;
+    return h + 'h ' + m + 'm';
+  }
+
+  function check() {
+    fetch(HEALTH_URL + '?ts=' + Date.now(), { cache: 'no-store' })
+      .then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(function (data) {
+        var raw = data.generated_at || data.timestamp || data.updated_at;
+        if (!raw) {
+          setState('fetch-fail', 'system_health.json has no generated_at field.',
+            'The publisher is writing, but the format is wrong.');
+          return;
+        }
+        var ageMin = Math.round((Date.now() - new Date(raw).getTime()) / 60000);
+
+        // Count offline projects too
+        var projects = data.projects || {};
+        var offline = [];
+        Object.keys(projects).forEach(function (k) {
+          var p = projects[k] || {};
+          if (p.status === 'offline' || (typeof p.health === 'number' && p.health < 40)) {
+            offline.push(k);
+          }
+        });
+
+        if (ageMin >= DEAD_MINUTES) {
+          setState('dead',
+            'PUBLISHER DEAD. system_health.json is ' + fmtAge(ageMin) + ' old.',
+            'launchd job has stopped. MacBook may be asleep or health_publisher crashed.');
+        } else if (ageMin >= STALE_MINUTES) {
+          setState('stale',
+            'Publisher heartbeat is ' + fmtAge(ageMin) + ' stale.',
+            'Missed multiple 15-min cycles. Check launchd and Docker on the MacBook.');
+        } else if (ageMin >= WARN_MINUTES) {
+          setState('warn',
+            'Heartbeat is ' + fmtAge(ageMin) + ' old. Missed one cycle.',
+            offline.length ? ('Offline: ' + offline.join(', ')) : '');
+        } else if (offline.length) {
+          setState('warn',
+            'Publisher live but ' + offline.length + ' project(s) offline: ' + offline.join(', '),
+            '');
+        } else {
+          hide();
+        }
+      })
+      .catch(function (err) {
+        setState('fetch-fail',
+          'Cannot fetch system_health.json (' + err.message + ')',
+          'Either the repo is not serving, or the publisher never wrote this file.');
+      });
+  }
+
+  check();
+  setInterval(check, POLL_INTERVAL_MS);
+  window.pccStalenessCheck = check;
+})();
+</script>
+<!-- END PROJECT COMMAND CENTER STALENESS BANNER -->
+
 <div class="noise"></div>
 <div class="container">
   <div class="header">
