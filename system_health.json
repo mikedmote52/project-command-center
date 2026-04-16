@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-04-16T21:12:19+00:00",
+  "generated_at": "2026-04-16T21:27:21+00:00",
   "version": "2.0",
   "projects": {
     "mikes-trading-bot": {
       "status": "stale",
       "health": 40,
-      "last_updated_age_min": 44.3,
+      "last_updated_age_min": 59.3,
       "warnings": [],
       "notes": "source=health.json"
     },
@@ -24,9 +24,9 @@
     "sentinel-compass": {
       "status": "offline",
       "health": 15,
-      "db_age_min": 18596.6,
+      "db_age_min": 18611.6,
       "warnings": [
-        "DB last updated 309.9h ago"
+        "DB last updated 310.2h ago"
       ]
     },
     "intelligence-bridge": {
@@ -40,19 +40,18 @@
     "stuart-house-manager": {
       "status": "offline",
       "health": 15,
-      "data_age_min": 1512.3,
+      "data_age_min": 1527.3,
       "prospect_count": 15,
       "pending_prospects": 0,
       "warnings": [
-        "sweep data 25.2h stale"
+        "sweep data 25.5h stale"
       ]
     },
     "side-gig-bot": {
-      "status": "offline",
-      "health": 20,
-      "warnings": [
-        "fetch failed: HTTP Error 503: Service Unavailable"
-      ]
+      "status": "online",
+      "health": 100,
+      "http_code": 200,
+      "warnings": []
     },
     "project-command-center": {
       "status": "online",
@@ -61,7 +60,7 @@
     }
   },
   "failures": [],
-  "ok_count": 2,
+  "ok_count": 3,
   "checks_executed": 7,
   "total": 7
 }
