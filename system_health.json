@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-04-17T07:13:29+00:00",
+  "generated_at": "2026-04-17T07:28:31+00:00",
   "version": "2.0",
   "projects": {
     "mikes-trading-bot": {
       "status": "offline",
       "health": 15,
-      "last_updated_age_min": 645.5,
+      "last_updated_age_min": 660.5,
       "warnings": [],
       "notes": "source=health.json"
     },
@@ -24,9 +24,9 @@
     "sentinel-compass": {
       "status": "offline",
       "health": 15,
-      "db_age_min": 19197.8,
+      "db_age_min": 19212.8,
       "warnings": [
-        "DB last updated 320.0h ago"
+        "DB last updated 320.2h ago"
       ]
     },
     "intelligence-bridge": {
@@ -40,11 +40,11 @@
     "stuart-house-manager": {
       "status": "offline",
       "health": 15,
-      "data_age_min": 2113.5,
+      "data_age_min": 2128.5,
       "prospect_count": 15,
       "pending_prospects": 0,
       "warnings": [
-        "sweep data 35.2h stale"
+        "sweep data 35.5h stale"
       ]
     },
     "side-gig-bot": {
