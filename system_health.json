@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-04-18T19:33:02+00:00",
+  "generated_at": "2026-04-18T19:48:03+00:00",
   "version": "2.0",
   "projects": {
     "mikes-trading-bot": {
       "status": "offline",
       "health": 15,
-      "last_updated_age_min": 454.4,
+      "last_updated_age_min": 469.4,
       "warnings": [],
       "notes": "source=health.json"
     },
@@ -19,10 +19,10 @@
     },
     "sentinel-compass": {
       "status": "offline",
-      "health": 15,
-      "db_age_min": 21377.3,
+      "health": 0,
+      "db_age_min": null,
       "warnings": [
-        "DB last updated 356.3h ago"
+        "compass.db not found"
       ]
     },
     "intelligence-bridge": {
@@ -35,13 +35,11 @@
     },
     "stuart-house-manager": {
       "status": "offline",
-      "health": 15,
-      "data_age_min": 1442.2,
-      "prospect_count": 24,
-      "pending_prospects": 0,
+      "health": 0,
       "warnings": [
-        "sweep data 24.0h stale"
-      ]
+        "data.json missing or unreadable"
+      ],
+      "notes": "expected at /Users/michaelmote/Desktop/stuart-house-dashboard/data.json"
     },
     "side-gig-bot": {
       "status": "online",
