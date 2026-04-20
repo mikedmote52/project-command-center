@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-04-20T18:24:18+00:00",
+  "generated_at": "2026-04-20T18:39:21+00:00",
   "version": "2.0",
   "projects": {
     "mikes-trading-bot": {
       "status": "offline",
       "health": 15,
-      "last_updated_age_min": 144.6,
+      "last_updated_age_min": 159.7,
       "warnings": [],
       "notes": "source=health.json"
     },
@@ -42,10 +42,11 @@
       "notes": "expected at /Users/michaelmote/Desktop/stuart-house-dashboard/data.json"
     },
     "side-gig-bot": {
-      "status": "online",
-      "health": 100,
-      "http_code": 200,
-      "warnings": []
+      "status": "offline",
+      "health": 20,
+      "warnings": [
+        "fetch failed: HTTP Error 503: Service Unavailable"
+      ]
     },
     "project-command-center": {
       "status": "online",
@@ -54,7 +55,7 @@
     }
   },
   "failures": [],
-  "ok_count": 2,
+  "ok_count": 1,
   "checks_executed": 7,
   "total": 7
 }
