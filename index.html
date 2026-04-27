@@ -503,11 +503,11 @@ const DEFAULT_PROJECTS = [
   {
     name: "Kalshi Bot",
     subtitle: "claude-kalshi",
-    desc: "Prediction market analysis system for Kalshi Intelligence Dashboard. Identifies mispriced contracts using sentiment analysis and event data. Feeds signals into the Intelligence Bridge for cross-system aggregation. Resolution checker is live. 45 trades open, 1 lifetime resolved (+$156.24).",
+    desc: "Prediction market analysis system for Kalshi Intelligence Dashboard. Identifies mispriced contracts using sentiment analysis and event data. Feeds signals into the Intelligence Bridge for cross-system aggregation. Resolution checker is live. 45 trades open, 1 lifetime resolved (+$156.24). Dashboard consolidated 2026-04-27 to GitHub Pages — Vercel mirror retired.",
     category: "trading",
     status: "development",
     health: 70,
-    nextSteps: "Populate ai_probability field on every new trade — current reconciled trades lack it, blocking Brier scoring. Deploy upgraded analyzers and trading engine. Close feedback loop with Brier scoring once ai_probability is reliable.",
+    nextSteps: "Populate ai_probability field on every new trade — current reconciled trades lack it, blocking Brier scoring. Deploy upgraded analyzers and trading engine. Close feedback loop with Brier scoring once ai_probability is reliable. Sync now pushes to mikedmote52/kalshi-dashboard via refresh_kalshi_pages.sh; old refresh_kalshi_vercel.sh deprecated.",
     tech: ["Python","Kalshi API","Claude API","Intelligence Bridge","Telegram"],
     links: [
       { label: "Live Dashboard", url: "https://mikedmote52.github.io/kalshi-dashboard/", type: "live" },
