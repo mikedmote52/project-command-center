@@ -488,32 +488,32 @@ const DEFAULT_PROJECTS = [
   {
     name: "Squeeze Prophet",
     subtitle: "mikes-trading-bot",
-    desc: "AI-powered squeeze detection bot. Daily market scans, win-rate learning system, real-time Telegram alerts, circuit breaker kill switch. Ghost portfolio running alongside live Alpaca paper trades. 75% win rate on 4 closed trades, $100K+ total equity.",
+    desc: "AI-powered squeeze detection bot. Daily market scans, win-rate learning system, real-time Telegram alerts, circuit breaker kill switch. Ghost portfolio running alongside live Alpaca paper trades. Trading v2 rebuild in flight per the master plan brief — 6 sequenced shifts. Schema leak at data/v2_dashboard.json is the root failure mode. Only confirmed edge is trailing stops. Today's portfolio: $100,346 equity / $99,686 cash / 9 positions / 1 stopped out today (SKLZ -3.37%).",
     category: "trading",
     status: "production",
-    health: 85,
-    nextSteps: "Connect live brokerage account for real trades. Monitor ghost portfolio P&L divergence. Tune scan time windows based on accumulated win-rate data.",
+    health: 65,
+    nextSteps: "Ship Shift 2 of v2 rebuild. Fix v2_dashboard.json schema. Validate trailing-stop strategy on next 10 trades. MAXN currently sitting at -9.82%, knocking on the -10% stop.",
     tech: ["Python","FastAPI","PostgreSQL","Alpaca","Polygon.io","Claude API","Telegram","Docker"],
     links: [
       { label: "Live Dashboard", url: "https://mikedmote52.github.io/mikes-trading-bot-dashboard/?v=3", type: "live" },
       { label: "GitHub", url: "https://github.com/mikedmote52/mikes-trading-bot-dashboard", type: "repo" }
     ],
-    lastUpdated: "2026-04-03"
+    lastUpdated: "2026-04-27"
   },
   {
     name: "Kalshi Bot",
     subtitle: "claude-kalshi",
-    desc: "Prediction market analysis system for Kalshi Intelligence Dashboard. Identifies mispriced contracts using sentiment analysis and event data. Feeds signals into the Intelligence Bridge for cross-system aggregation.",
+    desc: "Prediction market analysis system for Kalshi Intelligence Dashboard. Identifies mispriced contracts using sentiment analysis and event data. Feeds signals into the Intelligence Bridge for cross-system aggregation. Resolution checker is live. 45 trades open, 1 lifetime resolved (+$156.24).",
     category: "trading",
     status: "development",
     health: 70,
-    nextSteps: "Deploy upgraded analyzers and trading engine. Connect Kalshi API credentials. Close feedback loop with Brier scoring.",
+    nextSteps: "Populate ai_probability field on every new trade — current reconciled trades lack it, blocking Brier scoring. Deploy upgraded analyzers and trading engine. Close feedback loop with Brier scoring once ai_probability is reliable.",
     tech: ["Python","Kalshi API","Claude API","Intelligence Bridge","Telegram"],
     links: [
       { label: "Live Dashboard", url: "https://mikedmote52.github.io/kalshi-dashboard/", type: "live" },
       { label: "GitHub", url: "https://github.com/mikedmote52/kalshi-dashboard", type: "repo" }
     ],
-    lastUpdated: "2026-04-05"
+    lastUpdated: "2026-04-27"
   },
 
   {
@@ -533,23 +533,23 @@ const DEFAULT_PROJECTS = [
   {
     name: "Idea Lab / MoltBot",
     subtitle: "idea_lab",
-    desc: "Obsidian research vault. 92+ markdown files spanning consciousness research, political analysis, trading systems, content strategy. MoltBot CLI integration for API-backed research workflows. Cross-domain pattern analysis engine.",
+    desc: "Obsidian research vault. 92+ markdown files spanning consciousness research, political analysis, trading systems, content strategy. MoltBot CLI integration for API-backed research workflows. Daily moltbook scan running per the scheduled tasks list. Cross-domain pattern analysis engine.",
     category: "ai",
     status: "active",
     health: 70,
     nextSteps: "Clean up stale research threads. Run content audit against current project priorities. Tighten MoltBot caching and API credential rotation.",
     tech: ["Obsidian","Python","MoltBot API","Markdown"],
     links: [],
-    lastUpdated: "2026-04-03"
+    lastUpdated: "2026-04-27"
   },
   {
     name: "Mote Ops / Side Gig Bot",
     subtitle: "side-gig-bot",
-    desc: "Multi-product AI consulting + automation business. Three pillars: Mote Ops (consulting anchor), CallbackAI + ReviewAI (white-label voice agents), n8n template marketplace for lead gen and SaaS conversion.",
+    desc: "Multi-product AI consulting + automation business. Three pillars: Mote Ops (consulting anchor), CallbackAI + ReviewAI (white-label voice agents), n8n template marketplace for lead gen and SaaS conversion. Hero rewrite shipped today (commit a412cfc to moteops-landing main).",
     category: "business",
     status: "active",
-    health: 60,
-    nextSteps: "Drive traffic to landing page. Finalize CallbackAI pricing page. Build 3 more n8n templates for the marketplace. Launch proposal engine on Render.",
+    health: 70,
+    nextSteps: "Pricing block needs to land ($3K/$5K/$10K tiers with 'comparable agency quote: $25K+' anchor). Replace SVG dashboard mocks with real screenshots of all 5 shipped builds. Build the 'what would you build for me' interactive widget under the hero — competitors structurally cannot copy this. Danny appetite guide is part of this surface.",
     tech: ["HTML/CSS/JS","GitHub Pages","n8n","Synthflow","VAPI"],
     links: [
       { label: "Landing Page", url: "https://mikedmote52.github.io/moteops-landing/", type: "live" },
@@ -561,7 +561,7 @@ const DEFAULT_PROJECTS = [
       { label: "Landing Repo", url: "https://github.com/mikedmote52/moteops-landing", type: "repo" },
       { label: "Proposal Engine", url: "https://github.com/mikedmote52/moteops-proposal-engine", type: "repo" }
     ],
-    lastUpdated: "2026-04-03"
+    lastUpdated: "2026-04-27"
   },
   {
     name: "CoreVita Collective",
@@ -596,16 +596,76 @@ const DEFAULT_PROJECTS = [
   {
     name: "Berkeley Stuart House",
     subtitle: "berkeley-stuart-house",
-    desc: "Property management dashboard for rental in Berkeley, CA. Tracks prospects, tour scheduling, listing copy, daily management reports. 7+ prospects in pipeline with active/warm tracking.",
+    desc: "Property management dashboard for rental in Berkeley, CA. Tracks prospects, tour scheduling, listing copy, daily management reports. Multi-platform automation has been silently degrading — Chrome posting tool blocked on 4 FB groups, SpareRoom session expired 14+ days, Craigslist 12 days stale. 2 warm leads in flight (Eliza by ~4/30, Liam pending tour).",
     category: "personal",
     status: "active",
-    health: 65,
-    nextSteps: "Follow up with warm prospects (Patricia, Wenfamus). Archive declined leads. Update listing photos. Enable GitHub Pages (repo is private, needs Pages enabled) or deploy elsewhere.",
+    health: 50,
+    nextSteps: "Refresh SpareRoom session, manually repost to 4 FB groups (anti-bot blocking automation), repost Craigslist. Build session health check that pings within 24h instead of 14 days. Follow up with Eliza and Liam.",
     tech: ["HTML Dashboard","Excel","Markdown","Automation"],
     links: [
       { label: "GitHub (private)", url: "https://github.com/mikedmote52/stuart-house-dashboard", type: "repo" }
     ],
-    lastUpdated: "2026-04-03"
+    lastUpdated: "2026-04-27"
+  },
+  {
+    name: "OpenClaw Trader",
+    subtitle: "openclaw-trader",
+    desc: "Market-wide momentum scanner. 8 scheduled tasks running daily: pre-market pipeline, midday check, power hour, market close, missed opportunities, nightly learner, weekly review, plus the 6 AM brief. Generates the morning Squeeze Prophet brief sent via iMessage. Separate codebase from mikes-trading-bot — OpenClaw is the analyst, mikes-trading-bot is the trader.",
+    category: "trading",
+    status: "production",
+    health: 75,
+    nextSteps: "Calibrate scanner weights based on missed-opportunity log. Connect feedback loop to mikes-trading-bot v2 watchlist.",
+    tech: ["Python","Polygon","Alpaca","Yahoo Finance","iMessage"],
+    links: [],
+    lastUpdated: "2026-04-27"
+  },
+  {
+    name: "Notification Router",
+    subtitle: "notification-router",
+    desc: "Daily 8 AM consolidated briefing + policy-gated auto-fix dispatcher. Reads system iMessages, classifies, queues fix tasks for machine-resolvable issues. Has a 15-min consumer that polls and executes queued fixes, plus a launchd file watcher for sub-90-second event-triggered runs. All openclaw repo-write policies default to escalate_only during the v2 rebuild.",
+    category: "tools",
+    status: "production",
+    health: 80,
+    nextSteps: "Flip openclaw policies to auto-fix once Trading v2 Shift 2 ships.",
+    tech: ["Python","launchd","iMessage","JSON queue"],
+    links: [],
+    lastUpdated: "2026-04-27"
+  },
+  {
+    name: "Dating Tracker",
+    subtitle: "dating-tracker",
+    desc: "Privacy-first observer of Mike's iMessage threads. Daily morning digest at 8:15 AM, midday check at 12:30 PM (silent unless 60+ min unanswered from a tracked contact), evening recap at 6:30 PM, weekly Sunday review. Read-only on women's threads. Data lives only at ~/Desktop/dating-tracker/.",
+    category: "personal",
+    status: "active",
+    health: 75,
+    nextSteps: "Continue weekly review cadence. Watch for fading transitions.",
+    tech: ["Python","iMessage","scheduled tasks"],
+    links: [],
+    lastUpdated: "2026-04-27"
+  },
+  {
+    name: "Scam Baiter",
+    subtitle: "scam-baiter",
+    desc: "Scans tagged scam-bait numbers every 30 min between 7 AM and midnight, replies in persona within strict hard rules. Daily 9 PM digest if there's activity, silent skip otherwise.",
+    category: "personal",
+    status: "active",
+    health: 70,
+    nextSteps: "Review weekly digest for persona drift.",
+    tech: ["Python","iMessage"],
+    links: [],
+    lastUpdated: "2026-04-27"
+  },
+  {
+    name: "Yahoo Triage",
+    subtitle: "yahoo-triage",
+    desc: "Daily 8:30 AM Yahoo Mail triage via Claude-in-Chrome. Classifies, drafts replies, opens action URLs, prefills safe form fields, sends iMessage summary. Replaced morning-inbox-summary.",
+    category: "tools",
+    status: "production",
+    health: 80,
+    nextSteps: "Fold auto-trash kill-list in once Mike approves.",
+    tech: ["Python","Claude-in-Chrome","Yahoo Mail"],
+    links: [],
+    lastUpdated: "2026-04-27"
   },
 ];
 
