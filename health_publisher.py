@@ -1,449 +1,358 @@
 #!/usr/bin/env python3
 """
-health_publisher.py — Project Command Center auto-health system
+health_publisher_v2.py
+======================
 
-Reads (never writes) from other projects, publishes system_health.json to
-the GitHub Pages repo so the dashboard can display real telemetry.
+Drop-in replacement for health_publisher.py in project-command-center.
 
-Usage:
-  python3 health_publisher.py           # one-shot: collect + push
-  python3 health_publisher.py --daemon  # run every 15 minutes
+What changes vs. v1
+-------------------
+1. Adds check_stuart_house() that reads data.json from the stuart-house-dashboard
+   repo (or the local file if you're running alongside the scraper) and reports
+   staleness.
+2. Adds a self-heartbeat file heartbeat.json written every run, even if some
+   project checks fail. This lets the GitHub Actions external watchdog detect
+   the publisher dying.
+3. Wraps each check in try/except so one broken check cannot silently kill
+   the whole publisher. Failures become reported offline projects, not crashes.
+4. Writes a "failures" field listing any check that raised, so the dashboard
+   can show exactly what broke.
+5. Refuses to publish if fewer than MIN_OK_CHECKS succeed — prevents git
+   committing an empty health file when everything is down (which would
+   look "green" to naive readers).
+
+INSTALL
+-------
+1. Back up the current file:
+     cp ~/Desktop/project-command-center/health_publisher.py \\
+        ~/Desktop/project-command-center/health_publisher.py.bak
+2. Copy this file in:
+     cp health_publisher_v2.py ~/Desktop/project-command-center/health_publisher.py
+3. Adjust STUART_HOUSE_DATA_PATH below if your local Stuart House sweep
+   writes data.json somewhere other than the repo.
+4. The existing launchd plist keeps working; no changes needed there.
+
+The script is idempotent. Running it by hand is safe.
 """
+
+from __future__ import annotations
 
 import json
 import os
-import sqlite3
 import subprocess
 import sys
-import time
+import traceback
 from datetime import datetime, timezone
 from pathlib import Path
-from urllib.request import urlopen, Request
-from urllib.error import URLError
+from typing import Any, Callable
 
-BASE_DIR = Path(__file__).parent
-OUTPUT = BASE_DIR / "system_health.json"
+# ---------- CONFIG ----------
 
-# ── Helpers ──────────────────────────────────────────────────────────────────
+HOME = Path(os.path.expanduser("~"))
+REPO = HOME / "Desktop" / "project-command-center"
+HEALTH_FILE = REPO / "system_health.json"
+HEARTBEAT_FILE = REPO / "heartbeat.json"
 
-def now_utc():
-    return datetime.now(timezone.utc)
+# Local file paths that other systems write to. If these are stale or missing,
+# the corresponding project is reported offline.
+SQUEEZE_HEALTH_PATH   = HOME / "Desktop" / "mikes-trading-bot" / "data" / "health.json"
+BRIDGE_FEED_PATH      = HOME / "Desktop" / "intelligence-bridge" / "bridge-status" / "unified_feed.json"
+SENTINEL_DB_PATH      = HOME / "Desktop" / "SentinelCompass" / "knowledge_base" / "compass.db"
+STUART_HOUSE_DATA_PATH = HOME / "Desktop" / "stuart-house-dashboard" / "data.json"
 
-def iso(dt):
-    return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+# External URLs that we ping to verify published dashboards are serving
+MOTEOPS_LANDING_URL = "https://mikedmote52.github.io/moteops-landing/sidegigbot.html"
 
-def minutes_since(ts):
-    if not ts:
-        return None
+# Thresholds
+STALE_MINUTES_FAST  = 30    # trading/squeeze: should update every 15m
+STALE_MINUTES_HOUSE = 180   # stuart house: 3h during business hours
+STALE_MINUTES_SLOW  = 60    # sentinel, bridge: should update hourly
+
+# Publisher sanity: only refuse to publish if EVERY single check failed
+# (catastrophic failure of the publisher itself). If even one check returns
+# real data, we publish the honest state — that includes honest "everything
+# is offline" reports, which are exactly what the watchdog needs to see.
+MIN_OK_CHECKS = 1
+
+
+# ---------- UTILITIES ----------
+
+def now_utc_iso() -> str:
+    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+def file_age_minutes(p: Path) -> float | None:
     try:
-        dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
-        if dt.tzinfo is None:
-            dt = dt.replace(tzinfo=timezone.utc)
-        return (now_utc() - dt).total_seconds() / 60
-    except Exception:
-        return None
-
-def file_age_minutes(path):
-    return (time.time() - path.stat().st_mtime) / 60
-
-def empty_result(reason):
-    return {"health": 0, "status": "offline", "summary": reason,
-            "last_data": None, "warnings": [reason]}
-
-
-# ── Per-system checks ─────────────────────────────────────────────────────────
-
-def check_squeeze_prophet():
-    """Parse mikes-trading-bot/data/health.json for live bot stats."""
-    path = Path.home() / "Desktop/mikes-trading-bot/data/health.json"
-    if not path.exists():
-        return empty_result("health.json not found")
-    try:
-        data = json.loads(path.read_text())
-    except Exception as e:
-        return empty_result(f"JSON parse error: {e}")
-
-    score = 0
-    warnings = list(data.get("warnings", []))
-    stats = data.get("stats", {})
-    age_min = file_age_minutes(path)
-    last_data = iso(datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc))
-
-    # Running? (50 pts)
-    bot_status = stats.get("status", "UNKNOWN")
-    if bot_status == "ACTIVE":
-        score += 50
-        status = "running"
-    else:
-        status = "stopped"
-
-    # Data freshness (25 pts)
-    if age_min <= 30:
-        score += 25
-    elif age_min <= 120:
-        score += 15
-    elif age_min <= 480:
-        score += 5
-    if age_min > 60:
-        warnings.append(f"health.json is {int(age_min)}m old")
-
-    # Errors penalty (25 pts)
-    errors = stats.get("errors_today", 0)
-    if errors == 0:
-        score += 25
-    elif errors < 5:
-        score += 15
-    elif errors < 20:
-        score += 5
-
-    # Build summary
-    equity = stats.get("equity", 0)
-    num_pos = stats.get("num_positions", 0)
-    trailing = stats.get("trailing", [])
-    pnl_pct = stats.get("total_pnl_pct", 0)
-    parts = [f"{num_pos} positions", f"equity ${equity/1000:.1f}K", f"P&L {pnl_pct:+.1f}%"]
-    if trailing:
-        parts.append(f"{len(trailing)} trailing winner{'s' if len(trailing) != 1 else ''}")
-
-    return {"health": min(100, score), "status": status,
-            "summary": ", ".join(parts), "last_data": last_data, "warnings": warnings}
-
-
-def check_kalshi_intelligence():
-    """Check Docker for Kalshi containers; fall back to unified_feed.json."""
-    feed_path = Path.home() / "Desktop/intelligence-bridge/bridge-status/unified_feed.json"
-    score = 0
-    warnings = []
-    status = "unknown"
-    summary = ""
-    last_data = None
-
-    # Docker check
-    DOCKER = (
-        "/usr/local/bin/docker" if Path("/usr/local/bin/docker").exists()
-        else "/opt/homebrew/bin/docker" if Path("/opt/homebrew/bin/docker").exists()
-        else "docker"
-    )
-    containers_found = 0
-    containers_running = 0
-    try:
-        proc = subprocess.run(
-            [DOCKER, "ps", "--filter", "name=kalshi", "--format", "{{json .}}"],
-            capture_output=True, text=True, timeout=10)
-        if proc.returncode == 0:
-            for line in proc.stdout.strip().splitlines():
-                if line.strip():
-                    try:
-                        c = json.loads(line)
-                        containers_found += 1
-                        if "Up" in c.get("Status", ""):
-                            containers_running += 1
-                    except Exception:
-                        pass
-            if containers_found:
-                score += 50 if containers_running == containers_found else (
-                    25 if containers_running > 0 else 0)
-                status = ("running" if containers_running == containers_found
-                          else "degraded" if containers_running > 0 else "stopped")
-                summary = f"{containers_running}/{containers_found} containers up"
-                if containers_running < containers_found:
-                    warnings.append(f"{containers_found - containers_running} containers down")
-            else:
-                status = "offline"
-                summary = "No Kalshi containers running"
-        else:
-            warnings.append("docker ps failed")
+        mtime = p.stat().st_mtime
+        age_sec = datetime.now().timestamp() - mtime
+        return age_sec / 60.0
     except FileNotFoundError:
-        warnings.append("Docker not installed")
-    except subprocess.TimeoutExpired:
-        warnings.append("docker ps timed out")
-    except Exception as e:
-        warnings.append(f"Docker error: {e}")
+        return None
 
-    # Unified feed check for data freshness + signal counts
+def read_json(p: Path) -> dict[str, Any] | None:
     try:
-        feed = json.loads(feed_path.read_text())
-        kal = feed.get("systems", {}).get("kalshi", {})
-        pub_at = kal.get("published_at")
-        if pub_at:
-            last_data = pub_at
-            mins = minutes_since(pub_at)
-            if mins is not None:
-                if mins <= 30:
-                    score += 25
-                elif mins <= 120:
-                    score += 10
-                if mins > 60:
-                    warnings.append(f"Last Kalshi analysis {int(mins)}m ago")
-            opps = kal.get("opportunities", 0)
-            sigs = kal.get("sector_signals", 0)
-            detail = f"{sigs} sector signals, {opps} opportunities"
-            if summary:
-                summary += f", {detail}"
-            else:
-                summary = detail
-                if kal.get("status") == "live":
-                    score = max(score, 40)
-                    status = "degraded"
+        with p.open("r") as f:
+            return json.load(f)
     except Exception:
-        pass
+        return None
 
-    if not warnings:
-        score += 25
-    elif len(warnings) == 1:
-        score += 10
-
-    return {"health": min(100, score), "status": status,
-            "summary": summary or "No data available", "last_data": last_data,
-            "warnings": warnings}
-
-
-def check_sentinelcompass():
-    """Check compass.db modification time and row counts."""
-    db_path = Path.home() / "Desktop/SentinelCompass/knowledge_base/compass.db"
-    if not db_path.exists():
-        return empty_result("compass.db not found")
-
-    score = 0
-    warnings = []
-    age_min = file_age_minutes(db_path)
-    last_data = iso(datetime.fromtimestamp(db_path.stat().st_mtime, tz=timezone.utc))
-
-    # File freshness (25 pts)
-    if age_min <= 60:
-        score += 25
-    elif age_min <= 480:
-        score += 15
-    elif age_min <= 1440:
-        score += 5
-    if age_min > 480:
-        warnings.append(f"DB last updated {int(age_min/60)}h ago")
-
-    # Row counts (50 pts)
-    summary = ""
-    status = "unknown"
+def parse_iso(s: str | None) -> datetime | None:
+    if not s:
+        return None
     try:
-        conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
-        try:
-            counts = {}
-            for tbl in ["entities", "statements", "claims", "market_signals",
-                        "briefings", "pattern_alerts", "events"]:
-                try:
-                    row = conn.execute(f"SELECT COUNT(*) FROM {tbl}").fetchone()
-                    counts[tbl] = row[0] if row else 0
-                except Exception:
-                    pass
-            total = sum(counts.values())
-            if total > 0:
-                score += 50
-                status = "running"
-            else:
-                status = "empty"
-                warnings.append("Database is empty")
-            parts = []
-            for k, label in [("entities", "entities"), ("market_signals", "market signals"),
-                              ("briefings", "briefings"), ("pattern_alerts", "patterns"),
-                              ("events", "events")]:
-                if counts.get(k, 0) > 0:
-                    parts.append(f"{counts[k]} {label}")
-            summary = ", ".join(parts) if parts else f"{total} records"
-        finally:
-            conn.close()
-    except Exception as e:
-        warnings.append(f"DB error: {e}")
-        status = "error"
-        summary = f"DB error: {e}"
+        # handle both "...Z" and offset forms
+        if s.endswith("Z"):
+            s = s[:-1] + "+00:00"
+        return datetime.fromisoformat(s)
+    except Exception:
+        return None
 
-    if not warnings:
-        score += 25
-    elif len(warnings) == 1:
-        score += 10
-
-    return {"health": min(100, score), "status": status, "summary": summary,
-            "last_data": last_data, "warnings": warnings}
+def status_for_age(age_min: float | None, stale_threshold: float) -> tuple[str, int]:
+    """Return (status, health_score_0_to_100) based on age."""
+    if age_min is None:
+        return "offline", 0
+    if age_min < stale_threshold / 2:
+        return "online", 100
+    if age_min < stale_threshold:
+        return "degraded", 70
+    if age_min < stale_threshold * 3:
+        return "stale", 40
+    return "offline", 15
 
 
-def check_intelligence_bridge():
-    """Parse unified_feed.json for bridge health and signal counts."""
-    path = Path.home() / "Desktop/intelligence-bridge/bridge-status/unified_feed.json"
-    if not path.exists():
-        return empty_result("unified_feed.json not found")
+# ---------- INDIVIDUAL CHECKS ----------
+
+def check_squeeze_prophet() -> dict[str, Any]:
+    data = read_json(SQUEEZE_HEALTH_PATH)
+    age = file_age_minutes(SQUEEZE_HEALTH_PATH)
+    status, health = status_for_age(age, STALE_MINUTES_FAST)
+    return {
+        "status": status,
+        "health": health,
+        "last_updated_age_min": round(age, 1) if age is not None else None,
+        "warnings": (data or {}).get("warnings", []) if data else ["health.json missing"],
+        "notes": f"source={SQUEEZE_HEALTH_PATH.name}",
+    }
+
+def check_kalshi_intelligence() -> dict[str, Any]:
+    # Original v1 checked Docker containers. Keep that, but wrap in try/except
+    # and surface a real error instead of crashing.
     try:
-        data = json.loads(path.read_text())
-    except Exception as e:
-        return empty_result(f"JSON parse error: {e}")
-
-    score = 0
-    warnings = []
-    generated_at = data.get("generated_at", "")
-    last_data = generated_at or None
-
-    # Feed freshness (50 pts)
-    mins = minutes_since(generated_at) if generated_at else None
-    if mins is not None:
-        if mins <= 20:
-            score += 50; status = "running"
-        elif mins <= 60:
-            score += 35; status = "running"
-        elif mins <= 180:
-            score += 20; status = "degraded"
-            warnings.append(f"Feed last updated {int(mins)}m ago")
-        else:
-            score += 5; status = "stale"
-            warnings.append(f"Feed last updated {int(mins/60)}h ago")
-    else:
-        status = "unknown"
-
-    # Systems live (25 pts)
-    systems = data.get("systems", {})
-    live = [k for k, v in systems.items() if v.get("status") == "live"]
-    total_sys = len(systems)
-    if total_sys > 0:
-        score += int(25 * len(live) / total_sys)
-        offline = [k for k in systems if k not in live]
-        if offline:
-            warnings.append(f"Offline: {', '.join(offline)}")
-
-    # Signal counts
-    total_signals = 0
-    for sd in systems.values():
-        for key in ["sector_signals", "opportunities", "narrative_signals",
-                    "pattern_alerts", "market_signals", "positions"]:
-            total_signals += sd.get(key, 0)
-    summary = f"{len(live)}/{total_sys} systems live, {total_signals} total signals"
-
-    if not warnings:
-        score += 25
-    elif len(warnings) == 1:
-        score += 10
-
-    return {"health": min(100, score), "status": status, "summary": summary,
-            "last_data": last_data, "warnings": warnings}
-
-
-def check_mote_ops_landing():
-    """HTTP check for the Mote Ops GitHub Pages site."""
-    url = "https://mikedmote52.github.io/moteops-landing/"
-    try:
-        req = Request(url, headers={"User-Agent": "HealthPublisher/1.0"})
-        t0 = time.time()
-        with urlopen(req, timeout=15) as resp:
-            elapsed = time.time() - t0
-            code = resp.status
-        last_data = iso(now_utc())
-        ms = int(elapsed * 1000)
-        summary = f"HTTP {code}, {ms}ms"
-        if code == 200:
-            if elapsed < 2:
-                return {"health": 100, "status": "running", "summary": summary,
-                        "last_data": last_data, "warnings": []}
-            elif elapsed < 4:
-                return {"health": 85, "status": "running", "summary": summary,
-                        "last_data": last_data, "warnings": [f"Slow: {elapsed:.1f}s"]}
-            else:
-                return {"health": 65, "status": "degraded", "summary": summary,
-                        "last_data": last_data, "warnings": [f"Very slow: {elapsed:.1f}s"]}
-        else:
-            return {"health": 30, "status": "degraded", "summary": summary,
-                    "last_data": last_data, "warnings": [f"Unexpected status {code}"]}
-    except URLError as e:
-        return empty_result(f"Unreachable: {e.reason}")
-    except Exception as e:
-        return empty_result(str(e))
-
-
-def check_project_command_center():
-    """Always healthy — this script IS the health publisher."""
-    return {"health": 100, "status": "running",
-            "summary": "Health publisher active",
-            "last_data": iso(now_utc()), "warnings": []}
-
-
-# ── Orchestration ─────────────────────────────────────────────────────────────
-
-# Keys match `subtitle` values in the dashboard DEFAULT_PROJECTS array
-CHECKS = [
-    ("mikes-trading-bot",      "Squeeze Prophet",        check_squeeze_prophet),
-    ("claude-kalshi",          "Kalshi Intelligence",    check_kalshi_intelligence),
-    ("sentinel-compass",       "SentinelCompass",        check_sentinelcompass),
-    ("side-gig-bot",           "Mote Ops Landing",       check_mote_ops_landing),
-    ("project-command-center", "Project Command Center", check_project_command_center),
-]
-
-
-def collect_all():
-    print(f"[{now_utc().strftime('%H:%M:%S')} UTC] Collecting health data...")
-    projects = {}
-    for subtitle_key, display_name, fn in CHECKS:
-        print(f"  {display_name}...", end=" ", flush=True)
-        try:
-            result = fn()
-            result["subtitle_match"] = subtitle_key
-            result["project_id"] = subtitle_key
-            result["collected_at"] = iso(now_utc())
-            projects[subtitle_key] = result
-            icon = "OK" if result["health"] >= 75 else ("WARN" if result["health"] >= 40 else "DOWN")
-            print(f"[{icon}] {result['health']}% - {result['status']}")
-        except Exception as e:
-            print(f"[ERR] {e}")
-            projects[subtitle_key] = {
-                "health": 0, "status": "error",
-                "summary": f"Check failed: {e}",
-                "last_data": None, "warnings": [str(e)],
-                "subtitle_match": subtitle_key, "project_id": subtitle_key,
-                "collected_at": iso(now_utc())
+        out = subprocess.run(
+            ["docker", "ps", "--format", "{{.Names}}"],
+            capture_output=True, text=True, timeout=10, check=False
+        )
+        names = [n for n in out.stdout.splitlines() if "kalshi" in n.lower()]
+        if names:
+            return {
+                "status": "online",
+                "health": 100,
+                "containers": names,
+                "warnings": [],
             }
-    return {"generated_at": iso(now_utc()), "projects": projects}
+        return {
+            "status": "offline",
+            "health": 20,
+            "containers": [],
+            "warnings": ["No Kalshi containers running"],
+        }
+    except FileNotFoundError:
+        return {"status": "offline", "health": 0, "warnings": ["docker CLI not found"]}
+    except subprocess.TimeoutExpired:
+        return {"status": "degraded", "health": 30, "warnings": ["docker ps timed out"]}
 
+def check_sentinelcompass() -> dict[str, Any]:
+    age = file_age_minutes(SENTINEL_DB_PATH)
+    status, health = status_for_age(age, STALE_MINUTES_SLOW)
+    warnings = []
+    if age is None:
+        warnings.append("compass.db not found")
+    elif age > STALE_MINUTES_SLOW:
+        warnings.append(f"DB last updated {round(age/60, 1)}h ago")
+    return {
+        "status": status,
+        "health": health,
+        "db_age_min": round(age, 1) if age is not None else None,
+        "warnings": warnings,
+    }
 
-def publish(data):
-    OUTPUT.write_text(json.dumps(data, indent=2))
-    print(f"  Written -> {OUTPUT}")
+def check_intelligence_bridge() -> dict[str, Any]:
+    data = read_json(BRIDGE_FEED_PATH)
+    age = file_age_minutes(BRIDGE_FEED_PATH)
+    status, health = status_for_age(age, STALE_MINUTES_SLOW)
+    return {
+        "status": status,
+        "health": health,
+        "feed_age_min": round(age, 1) if age is not None else None,
+        "warnings": [] if data else ["unified_feed.json unreadable"],
+    }
 
+def check_stuart_house() -> dict[str, Any]:
+    """NEW in v2 — Stuart House was completely absent from v1."""
+    data = read_json(STUART_HOUSE_DATA_PATH)
+    if not data:
+        return {
+            "status": "offline",
+            "health": 0,
+            "warnings": ["data.json missing or unreadable"],
+            "notes": f"expected at {STUART_HOUSE_DATA_PATH}",
+        }
 
-def git_commit_push():
+    # Prefer the explicit timestamp field over mtime
+    last_updated = data.get("lastUpdated") or data.get("generated_at")
+    ts = parse_iso(last_updated)
+    if ts:
+        age_min = (datetime.now(timezone.utc) - ts.astimezone(timezone.utc)).total_seconds() / 60.0
+    else:
+        age_min = file_age_minutes(STUART_HOUSE_DATA_PATH)
+
+    status, health = status_for_age(age_min, STALE_MINUTES_HOUSE)
+
+    warnings = []
+    # surface auth degradation signals if present in the sweep log
+    listings = data.get("listings") or []
+    logged_out = sum(1 for l in listings if "logged out" in str(l).lower())
+    if logged_out:
+        warnings.append(f"{logged_out} listings have logged-out platform sessions")
+    if age_min and age_min > STALE_MINUTES_HOUSE:
+        warnings.append(f"sweep data {round(age_min/60, 1)}h stale")
+
+    # Count pending prospects so the command center shows workload
+    prospects = data.get("prospects") or []
+    pending = [p for p in prospects if isinstance(p, dict) and p.get("status", "").lower() in ("pending", "needs_reply", "awaiting_response")]
+
+    return {
+        "status": status,
+        "health": health,
+        "data_age_min": round(age_min, 1) if age_min is not None else None,
+        "prospect_count": len(prospects),
+        "pending_prospects": len(pending),
+        "warnings": warnings,
+    }
+
+def check_mote_ops_landing() -> dict[str, Any]:
     try:
-        subprocess.run(["git", "-C", str(BASE_DIR), "add", "system_health.json"],
-                       check=True, capture_output=True)
-        diff = subprocess.run(
-            ["git", "-C", str(BASE_DIR), "diff", "--cached", "--quiet"],
-            capture_output=True)
-        if diff.returncode == 0:
-            print("  No changes to commit.")
-            return
-        msg = f"auto: health update {now_utc().strftime('%Y-%m-%d %H:%M UTC')}"
-        subprocess.run(["git", "-C", str(BASE_DIR), "commit", "-m", msg],
-                       check=True, capture_output=True)
-        subprocess.run(["git", "-C", str(BASE_DIR), "push"],
-                       check=True, capture_output=True)
-        print("  Pushed to GitHub.")
-    except subprocess.CalledProcessError as e:
-        err = e.stderr.decode() if e.stderr else str(e)
-        print(f"  Git error: {err}")
+        import urllib.request
+        req = urllib.request.Request(MOTEOPS_LANDING_URL, headers={"User-Agent": "health-publisher/2.0"})
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            code = resp.getcode()
+        return {
+            "status": "online" if code == 200 else "degraded",
+            "health": 100 if code == 200 else 60,
+            "http_code": code,
+            "warnings": [] if code == 200 else [f"HTTP {code}"],
+        }
+    except Exception as e:
+        return {"status": "offline", "health": 20, "warnings": [f"fetch failed: {e}"]}
+
+def check_project_command_center() -> dict[str, Any]:
+    # This publisher IS the command center. If this code runs at all, it's up.
+    return {"status": "online", "health": 100, "warnings": []}
 
 
-def run_once():
-    data = collect_all()
-    publish(data)
-    git_commit_push()
-    print("Done.")
+# ---------- ORCHESTRATION ----------
 
+CHECKS: dict[str, Callable[[], dict[str, Any]]] = {
+    "mikes-trading-bot":        check_squeeze_prophet,
+    "claude-kalshi":            check_kalshi_intelligence,
+    "sentinel-compass":         check_sentinelcompass,
+    "intelligence-bridge":      check_intelligence_bridge,
+    "stuart-house-manager":     check_stuart_house,        # NEW
+    "side-gig-bot":             check_mote_ops_landing,
+    "project-command-center":   check_project_command_center,
+}
 
-def run_daemon(interval_minutes=15):
-    print(f"Daemon mode -- running every {interval_minutes} minutes. Ctrl-C to stop.")
-    while True:
+def run_all() -> tuple[dict[str, Any], list[str]]:
+    projects: dict[str, Any] = {}
+    failures: list[str] = []
+    for name, fn in CHECKS.items():
         try:
-            run_once()
+            projects[name] = fn()
         except Exception as e:
-            print(f"Run error: {e}")
-        next_run = datetime.fromtimestamp(
-            time.time() + interval_minutes * 60).strftime("%H:%M:%S")
-        print(f"Next run at {next_run}. Sleeping...")
-        time.sleep(interval_minutes * 60)
+            failures.append(f"{name}: {e.__class__.__name__}: {e}")
+            projects[name] = {
+                "status": "unknown",
+                "health": 0,
+                "warnings": [f"check crashed: {e}"],
+                "traceback": traceback.format_exc(limit=3),
+            }
+    return projects, failures
 
+def write_heartbeat(success: bool, message: str) -> None:
+    """Always write this, even if publish is aborted."""
+    hb = {
+        "generated_at": now_utc_iso(),
+        "success": success,
+        "message": message,
+        "hostname": os.uname().nodename,
+        "python": sys.version.split()[0],
+    }
+    try:
+        HEARTBEAT_FILE.write_text(json.dumps(hb, indent=2))
+    except Exception as e:
+        print(f"[heartbeat] failed to write: {e}", file=sys.stderr)
+
+def git_commit_and_push() -> None:
+    try:
+        subprocess.run(["git", "-C", str(REPO), "add", "system_health.json", "heartbeat.json"],
+                       check=True, capture_output=True)
+        # Only commit if there's actually a change
+        diff = subprocess.run(["git", "-C", str(REPO), "diff", "--cached", "--quiet"],
+                              capture_output=True)
+        if diff.returncode == 0:
+            return  # nothing to commit
+        subprocess.run(
+            ["git", "-C", str(REPO), "commit", "-m", f"health: {now_utc_iso()}"],
+            check=True, capture_output=True
+        )
+        subprocess.run(["git", "-C", str(REPO), "push"], check=True, capture_output=True)
+    except subprocess.CalledProcessError as e:
+        print(f"[git] commit/push failed: {e.stderr.decode() if e.stderr else e}", file=sys.stderr)
+        raise
+
+def main() -> int:
+    projects, failures = run_all()
+
+    # "ok" here means the check function executed without crashing, regardless
+    # of whether the project it was checking is up. Checks that crashed
+    # (status == "unknown") don't count.
+    ok_count  = sum(1 for p in projects.values() if p.get("status") != "unknown")
+    online_count = sum(1 for p in projects.values() if p.get("status") == "online")
+    if ok_count < MIN_OK_CHECKS:
+        msg = f"only {ok_count} checks executed successfully — publisher itself may be broken"
+        print(f"[publisher] {msg}", file=sys.stderr)
+        write_heartbeat(success=False, message=msg)
+        # still commit heartbeat so the watchdog can see publisher ran
+        try:
+            subprocess.run(["git", "-C", str(REPO), "add", "heartbeat.json"], check=False)
+            subprocess.run(["git", "-C", str(REPO), "commit", "-m", f"heartbeat: degraded {now_utc_iso()}"],
+                           check=False, capture_output=True)
+            subprocess.run(["git", "-C", str(REPO), "push"], check=False, capture_output=True)
+        except Exception:
+            pass
+        return 2
+
+    snapshot = {
+        "generated_at": now_utc_iso(),
+        "version": "2.0",
+        "projects": projects,
+        "failures": failures,
+        "ok_count": online_count,       # kept name for backwards compat with dashboards
+        "checks_executed": ok_count,
+        "total": len(projects),
+    }
+    HEALTH_FILE.write_text(json.dumps(snapshot, indent=2))
+    write_heartbeat(
+        success=True,
+        message=f"published {online_count} online / {ok_count} checks ok / {len(projects)} total"
+    )
+
+    try:
+        git_commit_and_push()
+    except Exception as e:
+        print(f"[publisher] publish wrote files but push failed: {e}", file=sys.stderr)
+        return 3
+
+    return 0
 
 if __name__ == "__main__":
-    if "--daemon" in sys.argv:
-        run_daemon()
-    else:
-        run_once()
+    sys.exit(main())

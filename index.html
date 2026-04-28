@@ -605,17 +605,18 @@ const DEFAULT_PROJECTS = [
   {
     name: "LearnEngine",
     subtitle: "learn-engine",
-    desc: "Adaptive learning system converting YouTube videos into AI-analyzed quizzes with spaced repetition. Flask + Claude API backend. Security audit flagged 3 critical issues: plaintext API key, debug mode in prod, stored XSS.",
+    desc: "Adaptive learning system converting YouTube videos into AI-analyzed quizzes with spaced repetition. Static client on GitHub Pages, Vercel serverless proxy holds the OpenRouter key server-side, browser never sees it. Two-pass model routing: Sonnet 4.5 for concept synthesis and fact-checking (parallel), Haiku 4.5 for batched 10-12 question generation. Prompt caching on transcripts. Embeddings (text-embedding-3-small) for spaced repetition similarity stored in IndexedDB.",
     category: "tools",
-    status: "prototype",
-    health: 40,
-    nextSteps: "Fix 3 critical security issues before any deployment. Move API key to env vars. Disable Flask debug mode. Sanitize innerHTML to prevent XSS. Then deploy.",
-    tech: ["Flask","Python","Claude API","SQLite"],
+    status: "production",
+    health: 78,
+    nextSteps: "Wire up the spaced repetition review UI more visibly on dashboard. Add streaming explanations via /api/explain. Backfill embeddings for existing concepts. Optional: move to Vercel Pro for 300s function ceiling so Sonnet pass-1 can fan out further if transcripts grow.",
+    tech: ["Static HTML","Vercel Serverless","Python","OpenRouter","Claude Sonnet 4.5","Claude Haiku 4.5","IndexedDB","Embeddings"],
     links: [
       { label: "Live Demo", url: "https://mikedmote52.github.io/LearnEngine/", type: "live" },
+      { label: "Vercel Proxy", url: "https://learnengine-eta.vercel.app/", type: "live" },
       { label: "GitHub", url: "https://github.com/mikedmote52/LearnEngine", type: "repo" }
     ],
-    lastUpdated: "2026-03-29"
+    lastUpdated: "2026-04-27"
   },
   {
     name: "Berkeley Stuart House",
