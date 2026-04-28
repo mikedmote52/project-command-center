@@ -1,0 +1,53 @@
+{
+  "generated_at": "2026-04-28T00:08:32+00:00",
+  "source": "notification-router",
+  "router_state_last_run": "2026-04-27T21:23:24.520028+00:00",
+  "items": [
+    {
+      "id": "stuart.spareroom_expired",
+      "severity": "stale",
+      "title": "Stuart House: SpareRoom session expired",
+      "summary": "SpareRoom session expired 10+ days \u2014 SpareRoom session expired 14+ days (was top lead source)",
+      "deep_link": "https://www.spareroom.com/login",
+      "fix_link": "https://www.spareroom.com/login",
+      "first_seen": "2026-04-24",
+      "last_seen": "2026-04-27",
+      "repeat_count": 5,
+      "source_system": "stuart_house",
+      "queued_fix_task": null
+    },
+    {
+      "id": "openclaw.exit_state_missing",
+      "severity": "stale",
+      "title": "OpenClaw: exit_state.json missing \u2014 bot blind on exits",
+      "summary": "exit_state.json not found; bot running blind on exits \u2014 exit_state.json + dynamic_exit_manager.py not accessible (in /Documents/openclaw-trader not mounted)",
+      "deep_link": null,
+      "fix_link": null,
+      "first_seen": "2026-04-24",
+      "last_seen": "2026-04-27",
+      "repeat_count": 4,
+      "source_system": "openclaw",
+      "queued_fix_task": null
+    },
+    {
+      "id": "openclaw.catalyst_freshness_drift",
+      "severity": "warn",
+      "title": "OpenClaw: catalyst freshness decay",
+      "summary": "CYCN catalyst freshness decay reducing effective score \u2014 CYCN catalyst freshness decay (v3.5.1) reduces effective score. HELD + catalyst 26d stale (decay rule applies).",
+      "deep_link": null,
+      "fix_link": null,
+      "first_seen": "2026-04-27",
+      "last_seen": "2026-04-27",
+      "repeat_count": 2,
+      "source_system": "openclaw",
+      "queued_fix_task": null
+    }
+  ],
+  "summary": {
+    "total": 3,
+    "dead": 0,
+    "stale": 2,
+    "warn": 1,
+    "info": 0
+  }
+}

@@ -132,6 +132,35 @@
   .empty-state { text-align:center; padding:60px 20px; color:var(--text-muted); }
   @media(max-width:500px) { .projects-grid{grid-template-columns:1fr;} .form-row{grid-template-columns:1fr;} }
 
+  /* Action Inbox (notification-router widget) */
+  .action-inbox { margin-bottom:24px; }
+  .action-inbox-header { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px; }
+  .action-inbox-title { font-size:13px; font-weight:600; color:var(--text); letter-spacing:-0.2px; display:flex; align-items:center; gap:8px; }
+  .action-inbox-title .ai-pulse { width:6px; height:6px; border-radius:50%; background:var(--accent); animation:ai-pulse 2s infinite; }
+  @keyframes ai-pulse { 0%,100% { opacity:1; box-shadow:0 0 0 0 var(--accent); } 50% { opacity:0.5; box-shadow:0 0 0 4px transparent; } }
+  .action-inbox-meta { font-size:11px; color:var(--text-muted); font-family:'JetBrains Mono',monospace; }
+  .action-inbox-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(360px,1fr)); gap:10px; }
+  .ai-card { background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--text-muted); border-radius:10px; padding:12px 14px; display:flex; flex-direction:column; gap:6px; }
+  .ai-card.sev-warn { border-left-color:var(--yellow); }
+  .ai-card.sev-stale { border-left-color:#f97316; }
+  .ai-card.sev-dead { border-left-color:var(--red); }
+  .ai-card.sev-info { border-left-color:var(--cyan); }
+  .ai-row { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
+  .ai-title { font-size:13px; font-weight:600; color:var(--text); line-height:1.35; }
+  .ai-pill { font-size:9px; padding:2px 7px; border-radius:10px; text-transform:uppercase; letter-spacing:0.5px; font-weight:700; flex-shrink:0; font-family:'JetBrains Mono',monospace; }
+  .ai-pill.sev-warn { background:var(--yellow-bg); color:var(--yellow); }
+  .ai-pill.sev-stale { background:rgba(249,115,22,0.12); color:#fb923c; }
+  .ai-pill.sev-dead { background:var(--red-bg); color:var(--red); }
+  .ai-pill.sev-info { background:var(--cyan-bg); color:var(--cyan); }
+  .ai-summary { font-size:12px; color:var(--text-dim); line-height:1.5; }
+  .ai-meta { font-size:10px; color:var(--text-muted); font-family:'JetBrains Mono',monospace; display:flex; gap:8px; flex-wrap:wrap; }
+  .ai-actions { display:flex; gap:6px; margin-top:4px; }
+  .ai-btn { font-size:11px; padding:4px 10px; border-radius:6px; border:1px solid var(--border); background:transparent; color:var(--text-dim); cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:4px; font-family:inherit; transition:all 0.15s; }
+  .ai-btn:hover { border-color:var(--accent); color:var(--accent); }
+  .ai-btn.primary { background:var(--accent-glow); border-color:var(--accent); color:var(--accent); }
+  .ai-empty { background:var(--surface); border:1px dashed var(--border); border-radius:10px; padding:18px; text-align:center; font-size:12px; color:var(--text-muted); }
+  .ai-empty.stale { color:var(--yellow); border-color:var(--yellow); background:var(--yellow-bg); }
+
   /* Auto-health signals */
   .btn-refresh { min-width:126px; transition:all 0.2s; }
   .btn-refresh.checking { opacity:0.6; cursor:not-allowed; }
@@ -297,6 +326,7 @@
       <h1>Project <span>Command Center</span></h1>
       <p id="lastUpdated"></p>
       <p id="autoHealthBanner" style="font-size:11px;color:var(--text-muted);margin-top:2px;"></p>
+      <p style="font-size:11px;color:var(--text-muted);margin-top:2px;font-style:italic;">Project state refreshed Apr 27, 2026 — manual edits reset</p>
     </div>
     <div class="header-right">
       <button class="btn btn-refresh" id="refreshBtn" onclick="refreshHealth()">↻ Refresh Health</button>
@@ -305,6 +335,15 @@
       <button class="btn btn-primary" onclick="openModal()">+ New Project</button>
     </div>
   </div>
+
+  <div class="action-inbox" id="actionInbox">
+    <div class="action-inbox-header">
+      <div class="action-inbox-title"><span class="ai-pulse"></span> Action Inbox</div>
+      <div class="action-inbox-meta" id="actionInboxMeta">loading…</div>
+    </div>
+    <div id="actionInboxBody"></div>
+  </div>
+
   <div class="stats-bar" id="statsBar"></div>
   <div class="filter-bar">
     <button class="filter-btn active" data-filter="all">All</button>
@@ -352,7 +391,7 @@
 <input type="file" id="importFile" accept=".json" style="display:none" onchange="handleImport(event)">
 
 <script>
-const STORAGE_KEY = 'mike_cmd_center_v3';
+const STORAGE_KEY = 'mike_cmd_center_v4';
 
 // ── Auto-health (system_health.json published by health_publisher.py) ───────
 let autoHealthData = null;
@@ -488,11 +527,11 @@ const DEFAULT_PROJECTS = [
   {
     name: "Squeeze Prophet",
     subtitle: "mikes-trading-bot",
-    desc: "AI-powered squeeze detection bot. Daily market scans, win-rate learning system, real-time Telegram alerts, circuit breaker kill switch. Ghost portfolio running alongside live Alpaca paper trades. Trading v2 rebuild in flight per the master plan brief — 6 sequenced shifts. Schema leak at data/v2_dashboard.json is the root failure mode. Only confirmed edge is trailing stops. Today's portfolio: $100,346 equity / $99,686 cash / 9 positions / 1 stopped out today (SKLZ -3.37%).",
+    desc: "AI-powered squeeze detection bot. Daily market scans, win-rate learning system, real-time Telegram alerts, circuit breaker kill switch. Ghost portfolio running alongside live Alpaca paper trades. Live dashboard pulls health.json with portfolio equity, win rate, and bot status — see signals on this card. Confirmed edge: trailing stops. Trading-v2 rebuild brief is now treated as future-plan, not in-flight (Mike override 2026-04-25); v3.5.x is operating reality.",
     category: "trading",
     status: "production",
-    health: 65,
-    nextSteps: "Ship Shift 2 of v2 rebuild. Fix v2_dashboard.json schema. Validate trailing-stop strategy on next 10 trades. MAXN currently sitting at -9.82%, knocking on the -10% stop.",
+    health: 70,
+    nextSteps: "Validate trailing-stop strategy on next 10 trades. Resume v2 rebuild only when Mike explicitly chooses to — rebuild-gate flipped OPEN means deploys are no longer auto-deferred. Watch nightly-learner output for scanner-weight drift.",
     tech: ["Python","FastAPI","PostgreSQL","Alpaca","Polygon.io","Claude API","Telegram","Docker"],
     links: [
       { label: "Live Dashboard", url: "https://mikedmote52.github.io/mikes-trading-bot-dashboard/?v=3", type: "live" },
@@ -516,20 +555,6 @@ const DEFAULT_PROJECTS = [
     lastUpdated: "2026-04-27"
   },
 
-  {
-    name: "SentinelCompass",
-    subtitle: "sentinel-compass",
-    desc: "Political intelligence briefing system. 4-module pipeline: Claim Extractor, Claim Verifier, Pattern Matcher (8 authoritarian playbooks), Voice Adapter (complexity levels 1-4). 50 tiered news sources.",
-    category: "ai",
-    status: "prototype",
-    health: 45,
-    nextSteps: "Deploy server.py to a host (Render or Railway). Build mobile-friendly frontend from the existing React prototypes. Expand playbook library beyond 8 patterns.",
-    tech: ["Python","SQLite","Pydantic v2","Flask","React"],
-    links: [
-      { label: "GitHub", url: "https://github.com/mikedmote52/SentinelCompass", type: "repo" }
-    ],
-    lastUpdated: "2026-03-27"
-  },
   {
     name: "Idea Lab / MoltBot",
     subtitle: "idea_lab",
@@ -566,15 +591,14 @@ const DEFAULT_PROJECTS = [
   {
     name: "CoreVita Collective",
     subtitle: "corevita",
-    desc: "Boutique nurse-led private practice portal with AI coaching. 3-phase wellness model (Regulation, Stabilization, Optimization). Supabase auth with row-level security, Stripe at $399/mo flat, Cal.com scheduling.",
+    desc: "Boutique nurse-led private practice portal concept with AI coaching. 3-phase wellness model. The Next.js source repo (corevita-collective) was deleted from GitHub; only the static demo page on Pages still serves. Untouched since 03-29 — paused, not in active build.",
     category: "business",
-    status: "production",
-    health: 80,
-    nextSteps: "Deploy to production host and configure custom domain. Set up Stripe webhook handlers for live billing. Onboard first practitioner for beta testing.",
+    status: "paused",
+    health: 30,
+    nextSteps: "Decide: archive entirely or rebuild source repo from the demo. Right now this is a portfolio mock with no working backend — Supabase, Stripe, Cal.com integrations exist only on the design level.",
     tech: ["Next.js 14","TypeScript","Tailwind","Supabase","Stripe","Cal.com","OpenAI"],
     links: [
-      { label: "Live Demo", url: "https://mikedmote52.github.io/corevita-demo/", type: "live" },
-      { label: "GitHub", url: "https://github.com/mikedmote52/corevita-collective", type: "repo" }
+      { label: "Static Demo", url: "https://mikedmote52.github.io/corevita-demo/", type: "live" }
     ],
     lastUpdated: "2026-03-29"
   },
@@ -601,20 +625,21 @@ const DEFAULT_PROJECTS = [
     status: "active",
     health: 50,
     nextSteps: "Refresh SpareRoom session, manually repost to 4 FB groups (anti-bot blocking automation), repost Craigslist. Build session health check that pings within 24h instead of 14 days. Follow up with Eliza and Liam.",
-    tech: ["HTML Dashboard","Excel","Markdown","Automation"],
+    tech: ["HTML Dashboard","Excel","Markdown","Automation","GitHub Pages"],
     links: [
-      { label: "GitHub (private)", url: "https://github.com/mikedmote52/stuart-house-dashboard", type: "repo" }
+      { label: "Live Dashboard", url: "https://mikedmote52.github.io/stuart-house-dashboard/", type: "live" },
+      { label: "GitHub", url: "https://github.com/mikedmote52/stuart-house-dashboard", type: "repo" }
     ],
     lastUpdated: "2026-04-27"
   },
   {
     name: "OpenClaw Trader",
     subtitle: "openclaw-trader",
-    desc: "Market-wide momentum scanner. 8 scheduled tasks running daily: pre-market pipeline, midday check, power hour, market close, missed opportunities, nightly learner, weekly review, plus the 6 AM brief. Generates the morning Squeeze Prophet brief sent via iMessage. Separate codebase from mikes-trading-bot — OpenClaw is the analyst, mikes-trading-bot is the trader.",
+    desc: "Market-wide momentum scanner. 8 scheduled tasks running daily: pre-market pipeline, midday check, power hour, market close, missed opportunities, nightly learner, weekly review, plus the 6 AM brief. Generates the morning Squeeze Prophet brief sent via iMessage. OpenClaw is the analyst, mikes-trading-bot is the trader. Code lives in ~/Documents/openclaw-trader (not Desktop). exit_state.json + dynamic_exit_manager.py are flagged 4+ sessions in the Action Inbox above — bot running blind on exits until that's resolved.",
     category: "trading",
     status: "production",
-    health: 75,
-    nextSteps: "Calibrate scanner weights based on missed-opportunity log. Connect feedback loop to mikes-trading-bot v2 watchlist.",
+    health: 65,
+    nextSteps: "Resolve exit_state_missing flag (see Action Inbox). Calibrate scanner weights based on missed-opportunity log. CYCN catalyst freshness drift currently flagged — may need decay-rule tuning.",
     tech: ["Python","Polygon","Alpaca","Yahoo Finance","iMessage"],
     links: [],
     lastUpdated: "2026-04-27"
@@ -864,6 +889,89 @@ renderAll();
 setTimeout(refreshHealth, 1200);
 fetchAutoHealth();
 setInterval(updateAutoHealthBanner, 60000);
+
+// ── Action Inbox: notifications.json from notification-router ───────────────
+function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function fmtAge(ms){
+  const min=Math.round(ms/60000);
+  if(min<1) return 'just now';
+  if(min<60) return min+'m ago';
+  const h=Math.round(min/60);
+  if(h<24) return h+'h ago';
+  return Math.round(h/24)+'d ago';
+}
+function renderActionInbox(data){
+  const meta=document.getElementById('actionInboxMeta');
+  const body=document.getElementById('actionInboxBody');
+  if(!data){
+    meta.textContent='offline';
+    body.innerHTML='<div class="ai-empty">Notification router hasn\'t written notifications.json yet — see notification-router scheduled task.</div>';
+    return;
+  }
+  const gen=new Date(data.generated_at);
+  const ageMs=Date.now()-gen.getTime();
+  if(ageMs>24*3600*1000){
+    meta.textContent='stale ('+fmtAge(ageMs)+')';
+    body.innerHTML='<div class="ai-empty stale">notifications.json is '+fmtAge(ageMs)+' — notification-router may be stalled. Last generated '+gen.toLocaleString()+'.</div>';
+    return;
+  }
+  const items=Array.isArray(data.items)?data.items:[];
+  const sum=data.summary||{};
+  const counts=[];
+  if(sum.dead) counts.push(sum.dead+' dead');
+  if(sum.stale) counts.push(sum.stale+' stale');
+  if(sum.warn) counts.push(sum.warn+' warn');
+  meta.textContent=(counts.length?counts.join(' · ')+' · ':'')+'updated '+fmtAge(ageMs);
+  if(!items.length){
+    body.innerHTML='<div class="ai-empty">All clear — no open flags from the notification router.</div>';
+    return;
+  }
+  // Sort: dead > stale > warn > info, then by repeat_count desc
+  const order={dead:0,stale:1,warn:2,info:3};
+  items.sort((a,b)=>{
+    const sa=order[a.severity]??9, sb=order[b.severity]??9;
+    if(sa!==sb) return sa-sb;
+    return (b.repeat_count||0)-(a.repeat_count||0);
+  });
+  const html=items.map(it=>{
+    const sev=it.severity||'warn';
+    const cls='sev-'+sev;
+    const repeats=(it.repeat_count&&it.repeat_count>1)?(it.repeat_count+'× sessions'):'';
+    const firstSeen=it.first_seen?'first seen '+fmtAge(Date.now()-new Date(it.first_seen).getTime()):'';
+    const queued=it.queued_fix_task?'<span style="color:var(--accent);">⚙ fix queued</span>':'';
+    const metaParts=[repeats,firstSeen,queued].filter(Boolean);
+    const actions=[];
+    if(it.deep_link){
+      actions.push(`<a class="ai-btn primary" href="${escapeHtml(it.deep_link)}" target="_blank" rel="noopener">Open ↗</a>`);
+    }
+    if(it.fix_link){
+      actions.push(`<a class="ai-btn" href="${escapeHtml(it.fix_link)}" target="_blank" rel="noopener">Run fix</a>`);
+    }
+    return `<div class="ai-card ${cls}">
+      <div class="ai-row">
+        <div class="ai-title">${escapeHtml(it.title||it.id||'(untitled)')}</div>
+        <div class="ai-pill ${cls}">${escapeHtml(sev)}</div>
+      </div>
+      ${it.summary?`<div class="ai-summary">${escapeHtml(it.summary)}</div>`:''}
+      ${metaParts.length?`<div class="ai-meta">${metaParts.join(' · ')}</div>`:''}
+      ${actions.length?`<div class="ai-actions">${actions.join('')}</div>`:''}
+    </div>`;
+  }).join('');
+  body.innerHTML='<div class="action-inbox-grid">'+html+'</div>';
+}
+async function fetchActionInbox(){
+  try{
+    const res=await fetch('notifications.json?t='+Date.now(),{cache:'no-store'});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    renderActionInbox(data);
+  }catch(e){
+    renderActionInbox(null);
+  }
+}
+fetchActionInbox();
+setInterval(fetchActionInbox, 60000);
+// ───────────────────────────────────────────────────────────────────────────
 </script>
 </body>
 </html>
