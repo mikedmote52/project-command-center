@@ -1,33 +1,20 @@
 {
-  "generated_at": "2026-04-28T15:23:47+00:00",
+  "generated_at": "2026-04-29T15:55:15-07:00",
   "source": "notification-router",
-  "router_state_last_run": "2026-04-28T08:03:00-07:00",
+  "router_state_last_run": "2026-04-29T22:55:00Z",
   "items": [
     {
       "id": "stuart.spareroom_expired",
-      "severity": "stale",
+      "severity": "dead",
       "title": "Stuart House: SpareRoom session expired",
       "summary": "SpareRoom session expired 10+ days \u2014 SpareRoom re-list (session expired)",
       "deep_link": "https://www.spareroom.com/login",
       "fix_link": "https://www.spareroom.com/login",
       "first_seen": "2026-04-24",
-      "last_seen": "2026-04-28",
-      "repeat_count": 6,
+      "last_seen": "2026-04-29",
+      "repeat_count": 8,
       "source_system": "stuart_house",
       "queued_fix_task": null
-    },
-    {
-      "id": "openclaw.catalyst_freshness_drift",
-      "severity": "warn",
-      "title": "OpenClaw: catalyst freshness decay",
-      "summary": "CYCN catalyst freshness decay reducing effective score \u2014 CYCN 80/405 catalyst freshness decay rule applies (April 1 merger >10 days stale)",
-      "deep_link": null,
-      "fix_link": null,
-      "first_seen": "2026-04-27",
-      "last_seen": "2026-04-28",
-      "repeat_count": 3,
-      "source_system": "openclaw",
-      "queued_fix_task": "openclaw.catalyst_freshness_drift__2026-04-28T08-03-00-07-00.json"
     },
     {
       "id": "openclaw.fallback_mode",
@@ -37,8 +24,8 @@
       "deep_link": null,
       "fix_link": null,
       "first_seen": "2026-04-28",
-      "last_seen": "2026-04-28",
-      "repeat_count": 1,
+      "last_seen": "2026-04-29",
+      "repeat_count": 3,
       "source_system": "openclaw",
       "queued_fix_task": null
     },
@@ -46,21 +33,21 @@
       "id": "openclaw.pipeline_blocked",
       "severity": "warn",
       "title": "OpenClaw: pipeline blocked",
-      "summary": "Orchestrator not found in Desktop; Full auto-execution did not run \u2014 PIPELINE NOTE: openclaw_orchestrator.py not found in mounted folder (Desktop). Scripts in Documents/openclaw-trader. Full auto-execution did not run.",
+      "summary": "Orchestrator not found in Desktop; Full auto-execution did not run \u2014 PIPELINE NOTE: openclaw_orchestrator.py not found in mounted folder (Desktop). Full auto-execution did not run.",
       "deep_link": null,
       "fix_link": null,
       "first_seen": "2026-04-28",
-      "last_seen": "2026-04-28",
-      "repeat_count": 1,
+      "last_seen": "2026-04-29",
+      "repeat_count": 3,
       "source_system": "openclaw",
       "queued_fix_task": null
     }
   ],
   "summary": {
-    "total": 4,
-    "dead": 0,
-    "stale": 1,
-    "warn": 3,
+    "total": 3,
+    "dead": 1,
+    "stale": 0,
+    "warn": 2,
     "info": 0
   }
 }
