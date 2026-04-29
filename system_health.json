@@ -1,25 +1,20 @@
 {
-  "generated_at": "2026-04-28T15:13:38+00:00",
+  "generated_at": "2026-04-29T22:55:16+00:00",
   "version": "2.0",
   "projects": {
     "mikes-trading-bot": {
       "status": "offline",
       "health": 15,
-      "last_updated_age_min": 101.8,
+      "last_updated_age_min": 142.1,
       "warnings": [],
       "notes": "source=health.json"
     },
     "claude-kalshi": {
-      "status": "online",
-      "health": 100,
-      "containers": [
-        "claude-kalshi-geopolitical-trading-1",
-        "claude-kalshi-geopolitical-collector-1",
-        "claude-kalshi-geopolitical-bot-1",
-        "claude-kalshi-geopolitical-intelligence-1",
-        "claude-kalshi-geopolitical-postgres-1"
-      ],
-      "warnings": []
+      "status": "offline",
+      "health": 0,
+      "warnings": [
+        "docker CLI not found"
+      ]
     },
     "sentinel-compass": {
       "status": "offline",
@@ -58,7 +53,7 @@
     }
   },
   "failures": [],
-  "ok_count": 3,
+  "ok_count": 2,
   "checks_executed": 7,
   "total": 7
 }
