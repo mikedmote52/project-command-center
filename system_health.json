@@ -1,12 +1,14 @@
 {
-  "generated_at": "2026-05-01T19:31:51+00:00",
+  "generated_at": "2026-05-01T19:47:09+00:00",
   "version": "2.0",
   "projects": {
     "mikes-trading-bot": {
-      "status": "offline",
-      "health": 15,
-      "last_updated_age_min": 360.1,
-      "warnings": [],
+      "status": "degraded",
+      "health": 70,
+      "last_updated_age_min": 15.1,
+      "warnings": [
+        "8 errors in log today"
+      ],
       "notes": "source=health.json"
     },
     "claude-kalshi": {
