@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-05-02T07:48:44+00:00",
+  "generated_at": "2026-05-02T08:03:46+00:00",
   "version": "2.0",
   "projects": {
     "mikes-trading-bot": {
       "status": "offline",
       "health": 15,
-      "last_updated_age_min": 582.1,
+      "last_updated_age_min": 597.2,
       "warnings": [],
       "notes": "source=health.json"
     },
