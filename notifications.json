@@ -1,31 +1,31 @@
 {
-  "generated_at": "2026-05-06T13:04:12-07:00",
+  "generated_at": "2026-05-08T08:16:19-07:00",
   "source": "notification-router",
-  "router_state_last_run": "2026-05-06T20:03:44.123921+00:00",
+  "router_state_last_run": "2026-05-08T15:15:35Z",
   "items": [
     {
       "id": "moteops_marketing.watchdog_dead",
       "severity": "dead",
       "title": "Mote Ops: Agent marketing-director (daily) \u2014 last seen None",
-      "summary": "Agent marketing-director (daily) \u2014 last seen None \u2014 Marketing tree: 4 agents dead (watchdog, vp-tracking, vp-content, vp-briefing)",
+      "summary": "Agent marketing-director (daily) \u2014 last seen None \u2014 ~ Marketing tree: 4 issues detected vp-tracking(dead), vp-content(dead), vp-briefing(dead), marketing-director(dead) iI y",
       "deep_link": null,
       "fix_link": null,
       "first_seen": "2026-05-04",
-      "last_seen": "2026-05-06",
-      "repeat_count": 18,
+      "last_seen": "2026-05-08",
+      "repeat_count": 19,
       "source_system": "moteops",
-      "queued_fix_task": "moteops_marketing.watchdog_dead__2026-05-06T06-30-39Z.json"
+      "queued_fix_task": "moteops_marketing.watchdog_dead__2026-05-07T16-59-51Z.json"
     },
     {
       "id": "openclaw.health_check_errors_multi",
-      "severity": "warn",
+      "severity": "stale",
       "title": "OpenClaw: multi-component health failures",
-      "summary": "TRADING BOT ALERT re-triggered \u2014 FAILURES detected \u2014 TRADING BOT ALERT FAILURES detected in today's messages",
+      "summary": "TRADING BOT ALERT re-triggered \u2014 FAILURES detected \u2014 NG BOT ALERT 2026-05-08 08:00 FAILURES: launchd \u2022 launchd issues: com.mikes-trading-bot exit_code=78",
       "deep_link": null,
       "fix_link": null,
       "first_seen": "2026-05-05",
-      "last_seen": "2026-05-06",
-      "repeat_count": 2,
+      "last_seen": "2026-05-08",
+      "repeat_count": 5,
       "source_system": "openclaw",
       "queued_fix_task": null
     }
@@ -33,8 +33,8 @@
   "summary": {
     "total": 2,
     "dead": 1,
-    "stale": 0,
-    "warn": 1,
+    "stale": 1,
+    "warn": 0,
     "info": 0
   }
 }
