@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-05-12T11:17:21+00:00",
+  "generated_at": "2026-05-12T11:32:25+00:00",
   "version": "2.0",
   "projects": {
     "mikes-trading-bot": {
       "status": "stale",
       "health": 40,
-      "last_updated_age_min": 53.9,
+      "last_updated_age_min": 68.9,
       "warnings": [
         "2 errors in log today"
       ],
@@ -42,18 +42,19 @@
     "stuart-house-manager": {
       "status": "offline",
       "health": 15,
-      "data_age_min": 5266.2,
+      "data_age_min": 5281.2,
       "prospect_count": 0,
       "pending_prospects": 0,
       "warnings": [
-        "sweep data 87.8h stale"
+        "sweep data 88.0h stale"
       ]
     },
     "side-gig-bot": {
-      "status": "online",
-      "health": 100,
-      "http_code": 200,
-      "warnings": []
+      "status": "offline",
+      "health": 20,
+      "warnings": [
+        "fetch failed: HTTP Error 503: Service Unavailable"
+      ]
     },
     "project-command-center": {
       "status": "online",
@@ -62,7 +63,7 @@
     }
   },
   "failures": [],
-  "ok_count": 3,
+  "ok_count": 2,
   "checks_executed": 7,
   "total": 7
 }
