@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-05-16T21:13:35+00:00",
+  "generated_at": "2026-05-16T21:28:37+00:00",
   "version": "2.0",
   "projects": {
     "mikes-trading-bot": {
-      "status": "online",
-      "health": 100,
-      "last_updated_age_min": 13.5,
+      "status": "degraded",
+      "health": 70,
+      "last_updated_age_min": 28.6,
       "warnings": [],
       "notes": "source=health.json"
     },
@@ -40,11 +40,11 @@
     "stuart-house-manager": {
       "status": "offline",
       "health": 15,
-      "data_age_min": 11622.4,
+      "data_age_min": 11637.5,
       "prospect_count": 0,
       "pending_prospects": 0,
       "warnings": [
-        "sweep data 193.7h stale"
+        "sweep data 194.0h stale"
       ]
     },
     "side-gig-bot": {
@@ -60,7 +60,7 @@
     }
   },
   "failures": [],
-  "ok_count": 4,
+  "ok_count": 3,
   "checks_executed": 7,
   "total": 7
 }
