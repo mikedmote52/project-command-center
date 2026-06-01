@@ -58,7 +58,7 @@ HEARTBEAT_FILE = REPO / "heartbeat.json"
 SQUEEZE_HEALTH_PATH   = HOME / "Desktop" / "mikes-trading-bot" / "data" / "health.json"
 BRIDGE_FEED_PATH      = HOME / "Desktop" / "intelligence-bridge" / "bridge-status" / "unified_feed.json"
 SENTINEL_DB_PATH      = HOME / "Desktop" / "SentinelCompass" / "knowledge_base" / "compass.db"
-STUART_HOUSE_DATA_PATH = HOME / "Desktop" / "stuart-house-dashboard" / "data.json"
+STUART_HOUSE_DATA_PATH = HOME / "Desktop" / "stuart-dash" / "data.json"
 
 # External URLs that we ping to verify published dashboards are serving
 MOTEOPS_LANDING_URL = "https://mikedmote52.github.io/moteops-landing/sidegigbot.html"
@@ -254,9 +254,15 @@ def check_project_command_center() -> dict[str, Any]:
 CHECKS: dict[str, Callable[[], dict[str, Any]]] = {
     "mikes-trading-bot":        check_squeeze_prophet,
     "claude-kalshi":            check_kalshi_intelligence,
-    "sentinel-compass":         check_sentinelcompass,
-    "intelligence-bridge":      check_intelligence_bridge,
-    "stuart-house-manager":     check_stuart_house,        # NEW
+    # Removed 2026-05-31 per Hermes/Mike: dead polling paths that always
+    # report offline. compass.db never existed on disk; unified_feed.json
+    # for intelligence-bridge is archived; stuart-dash data.json is one
+    # directory deeper than this publisher expects. These produced
+    # permanent "offline" cards that trained the operator to ignore real
+    # failures. Restore only if the underlying systems come back.
+    # "sentinel-compass":         check_sentinelcompass,
+    # "intelligence-bridge":      check_intelligence_bridge,
+    # "stuart-house-manager":     check_stuart_house,
     "side-gig-bot":             check_mote_ops_landing,
     "project-command-center":   check_project_command_center,
 }
