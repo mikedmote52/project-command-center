@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-06-01T00:35:12+00:00",
+  "generated_at": "2026-06-01T00:50:15+00:00",
   "version": "2.0",
   "projects": {
     "mikes-trading-bot": {
       "status": "stale",
       "health": 40,
-      "last_updated_age_min": 35.3,
+      "last_updated_age_min": 50.3,
       "warnings": [],
       "notes": "source=health.json"
     },
@@ -21,30 +21,6 @@
       ],
       "warnings": []
     },
-    "sentinel-compass": {
-      "status": "offline",
-      "health": 0,
-      "db_age_min": null,
-      "warnings": [
-        "compass.db not found"
-      ]
-    },
-    "intelligence-bridge": {
-      "status": "offline",
-      "health": 0,
-      "feed_age_min": null,
-      "warnings": [
-        "unified_feed.json unreadable"
-      ]
-    },
-    "stuart-house-manager": {
-      "status": "offline",
-      "health": 0,
-      "warnings": [
-        "data.json missing or unreadable"
-      ],
-      "notes": "expected at /Users/michaelmote/Desktop/stuart-dash/data.json"
-    },
     "side-gig-bot": {
       "status": "online",
       "health": 100,
@@ -59,6 +35,6 @@
   },
   "failures": [],
   "ok_count": 3,
-  "checks_executed": 7,
-  "total": 7
+  "checks_executed": 4,
+  "total": 4
 }
