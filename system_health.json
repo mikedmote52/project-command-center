@@ -1,21 +1,25 @@
 {
-  "generated_at": "2026-06-04T19:27:18+00:00",
+  "generated_at": "2026-06-04T19:42:51+00:00",
   "version": "2.0",
   "projects": {
     "mikes-trading-bot": {
-      "status": "offline",
-      "health": 15,
-      "last_updated_age_min": 352.0,
+      "status": "online",
+      "health": 100,
+      "last_updated_age_min": 14.8,
       "warnings": [],
       "notes": "source=health.json"
     },
     "claude-kalshi": {
-      "status": "offline",
-      "health": 20,
-      "containers": [],
-      "warnings": [
-        "No Kalshi containers running"
-      ]
+      "status": "online",
+      "health": 100,
+      "containers": [
+        "claude-kalshi-geopolitical-trading-1",
+        "claude-kalshi-geopolitical-collector-1",
+        "claude-kalshi-geopolitical-bot-1",
+        "claude-kalshi-geopolitical-intelligence-1",
+        "claude-kalshi-geopolitical-postgres-1"
+      ],
+      "warnings": []
     },
     "side-gig-bot": {
       "status": "online",
@@ -30,7 +34,7 @@
     }
   },
   "failures": [],
-  "ok_count": 2,
+  "ok_count": 4,
   "checks_executed": 4,
   "total": 4
 }
